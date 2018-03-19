@@ -1,0 +1,11 @@
+{
+  "podcasts": {
+    "items": [
+      {
+        "url": "https://rss.art19.com/music-popcast",
+        "title": "Popcast",
+        "description": "The Popcast is hosted by Jon Caramanica, a pop music critic for The New York Times. It covers the latest in pop music criticism, trends and news."
+      }
+     ]
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "page": {
+    "label": "TRANSLATE.CONFIG.TITLE"
+  },
+  "sections": [
+    {
+      "id": "podcast",
+      "element": "section",
+      "label": "TRANSLATE.CONFIG.PODCAST",
+      "icon": "fa-cogs",
+      "onSave": {
+        "type": "controller",
+        "endpoint":"music_service/podcast",
+        "method":"updateConfig"
+      },
+      "saveButton": {
+        "label": "TRANSLATE.CONFIG.SAVE",
+        "data": [
+          "podcast_list"
+        ]
+      },
+      "content": [
+        {
+          "id": "podcast_list",
+          "element": "select",
+          "label": "TRANSLATE.CONFIG.PODCAST_SELECT",
+          "value": {
+            "label": "",
+            "value": ""
+          },
+          "options": [
+            {
+              "label": "",
+              "value": ""
+            }
+          ]
+        },
+        {
+          "id": "delete_podcast",
+          "element": "button",
+          "label": "TRANSLATE.CONFIG.DELETE_PODCAST",
+          "onClick": {
+            "type": "emit",
+            "message": "callMethod",
+            "data": {
+              "endpoint": "music_service/podcast",
+              "method": "deletePodcast",
+              "data": ""
+            }
+          }
+        },
+        {
+          "id": "add_podcast_input",
+          "type": "text",
+          "element": "input",
+          "label": "Add RSS url",
+          "description": "Add podcast rss feed url address",
+          "value": ""
+        },
+        {
+          "id": "add_podcast",
+          "element": "button",
+          "label": "TRANSLATE.CONFIG.ADD_PODCAST",
+          "onClick": {
+            "type": "emit",
+            "message": "callMethod",
+            "data": {
+              "endpoint": "music_service/podcast",
+              "method": "addPodcast",
+              "data": ""
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
