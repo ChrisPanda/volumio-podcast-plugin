@@ -4,9 +4,6 @@
 var libQ = require('kew');
 var fs = require('fs-extra');
 var config = require('v-conf');
-var unirest = require('unirest');
-var crypto = require('crypto');
-var htmlToJson = require('html-to-json');
 var RssParser = require('rss-parser');
 
 module.exports = ControllerPodcast;
@@ -47,7 +44,7 @@ ControllerPodcast.prototype.onStart = function() {
   self.addPodcastsResource();
   self.addToBrowseSources();
 
-  self.serviceName = "personal_radio";
+  self.serviceName = "podcast";
 
   return libQ.resolve();
 };
@@ -90,8 +87,15 @@ ControllerPodcast.prototype.getUIConfig = function() {
       __dirname + '/UIConfig.json')
   .then(function(uiconf)
   {
-    uiconf.sections[0].content[0].value = self.config.get('sbsProtocol');
-    uiconf.sections[0].content[1].value = self.config.get('mbcProtocol');
+    uiconf.sections[0].content[0].options = [];
+    for (var item in self.podcasts) {
+      var podcastItem = {
+        label: item.title,
+        value:  item.title
+      };
+      uiconf.sections[0].content[0].options.push(podcastItem);
+    }
+    uiconf.sections[0].content[0].value = uiconf.sections[0].content[0].options[0];
 
     defer.resolve(uiconf);
   })
@@ -122,13 +126,6 @@ ControllerPodcast.prototype.updateConfig = function (data) {
     self.sbsProtocol = data['sbsProtocol'];
     configUpdated = true;
   }
-
-  if (self.config.get('mbcProtocol') != data['mbcProtocol']) {
-    self.config.set('mbcProtocol', data['mbcProtocol']);
-    self.mbcProtocol = data['mbcProtocol'];
-    configUpdated = true;
-  }
-
   if(configUpdated) {
     var responseData = {
       title: self.getRadioI18nString('PLUGIN_NAME'),
@@ -162,67 +159,17 @@ ControllerPodcast.prototype.addToBrowseSources = function () {
 ControllerPodcast.prototype.handleBrowseUri = function (curUri) {
   var self = this;
   var defer = libQ.defer();
-  var response;
 
-  //self.logger.info("ControllerPodcast::handleBrowseUri:"+curUri);
+  self.logger.info("ControllerPodcast::handleBrowseUri:"+curUri);
 
   if (curUri.startsWith('podcast')) {
     if (curUri === 'podcast') {
       defer.resolve(self.getRootContent());
     }
     else {
-      var uris = curUri.split('/');
-      defer.resolve(self.getPodcastContent(uris[1]);
+      defer.resolve(self.getPodcastContent(curUri));
     }
-
   }
-
-  return defer.promise;
-};
-;
-
-ControllerPodcast.prototype.getPodcast = function(channel, uri) {
-  var self = this;
-  var defer = libQ.defer();
-
-  self.logger.info("ControllerPodcast::podcast:post:"+ uri);
-  var rssParser = new RssParser({
-    customFields: {
-      channel: ['image']
-    }
-  });
-
-  self.commandRouter.pushToastMessage(
-      'info',
-      self.getRadioI18nString('PLUGIN_NAME'),
-      self.getRadioI18nString('WAIT_BBC_PODCAST_ITEMS')
-  );
-
-  rssParser.parseURL(self.bbcPodcastRSS + uri + '.rss',
-    function (err, feed) {
-
-      self.bbcNavigation.navigation.prev.uri = 'kradio/bbc/' + channel;
-      var response = self.bbcNavigation;
-      response.navigation.lists[0].title = self.getRadioI18nString('TITLE_' + channel.toUpperCase()) + '/' + feed.title;
-      response.navigation.lists[0].items = [];
-
-      self.podcastImage = feed.itunes.image;
-      //self.logger.info("ControllerPodcast::PODCAST:IMAGE:"+self.podcastImage);
-
-      feed.items.forEach(function (entry) {
-        //console.log(entry.title + ':' + entry.enclosureSecure.$.url);
-        var channel = {
-          service: self.serviceName,
-          type: 'podcast',
-          title: entry.title,
-          icon: 'fa fa-music',
-          uri: 'webbbc/0/' + entry.enclosureSecure.$.url
-        };
-        response.navigation.lists[0].items.push(channel);
-      });
-      //self.logger.info("ControllerPodcast::PodcastArticle:RESULT:"+ JSON.stringify(response));
-      defer.resolve(response);
-    });
 
   return defer.promise;
 };
@@ -232,72 +179,101 @@ ControllerPodcast.prototype.getRootContent = function() {
   var response;
   var defer = libQ.defer();
 
-  response = self.rootNavigation;
+  response = {
+    navigation: {
+      lists: [
+        {
+          availableListViews: [
+            "list", "grid"
+          ],
+          items: []
+        }
+      ],
+      prev: {
+        "uri": "/"
+      }
+    }
+  };
+
   response.navigation.lists[0].title = self.getRadioI18nString('PLUGIN_NAME');
   response.navigation.lists[0].items = [];
-  for (var key in self.rootStations) {
-      var radio = {
-        service: self.serviceName,
-        type: 'folder',
-        title: self.rootStations[key].title,
-        //icon: 'fa fa-folder-open-o',
-        uri: self.rootStations[key].uri,
-        albumart: '/albumart?sourceicon=music_service/personal_radio/logos/'+ self.rootStations[key].albumart
-      };
-      response.navigation.lists[0].items.push(radio);
+  for (var item in self.podcasts) {
+    var podcast = {
+      service: self.serviceName,
+      type: 'folder',
+      title: item.title,
+      //icon: 'fa fa-folder-open-o',
+      uri: 'podcast/' + item.index,
+      albumart: item.image
+    };
+    response.navigation.lists[0].items.push(podcast);
   }
   defer.resolve(response);
   return defer.promise;
 };
 
-ControllerPodcast.prototype.getRadioContent = function(station) {
-  var self=this;
-  var response;
-  var radioStation;
+ControllerPodcast.prototype.getPodcastContent = function(uri) {
+  var self = this;
   var defer = libQ.defer();
 
-  switch (station) {
-    case 'kbs':
-      radioStation = self.radioStations.kbs;
-      break;
-    case 'sbs':
-      radioStation = self.radioStations.sbs;
-      break;
-    case 'mbc':
-      radioStation = self.radioStations.mbc;
-      break;
-    case 'linn':
-      radioStation = self.radioStations.linn;
-      break;
-    case 'bbc':
-      radioStation = self.radioStations.bbc;
-  }
-
-  response = self.radioNavigation;
-  response.navigation.lists[0].title = self.getRadioI18nString('TITLE_' + station.toUpperCase());
-  response.navigation.lists[0].items = [];
-  for (var i in radioStation) {
-    var channel = {
-      service: self.serviceName,
-      title: radioStation[i].title,
-      uri: radioStation[i].uri
-    };
-    if (station === 'bbc') {
-      channel["type"] = 'folder';
-      //channel["icon"] = 'fa fa-folder-open-o';
-      channel["albumart"] = '/albumart?sourceicon=music_service/personal_radio/logos/'+ radioStation[i].albumart
+  self.logger.info("ControllerPodcast::podcast:"+ uri);
+  var rssParser = new RssParser({
+    customFields: {
+      channel: ['image']
     }
-    else {
-      channel["type"] = 'mywebradio';
-      channel["icon"] = 'fa fa-music';
-    }
-    response.navigation.lists[0].items.push(channel);
-  }
+  });
+  var uris = uri.split('/');
 
-  defer.resolve(response);
+  self.commandRouter.pushToastMessage(
+      'info',
+      self.getRadioI18nString('PLUGIN_NAME'),
+      self.getRadioI18nString('WAIT_BBC_PODCAST_ITEMS')
+  );
+
+  var response = {
+    "navigation": {
+      "lists": [
+        {
+          "availableListViews": [
+            "list", "grid"
+          ],
+          "items": [
+          ]
+        }
+      ],
+      "prev": {
+        "uri": "podcast"
+      }
+    }
+  };
+
+  rssParser.parseURL(self.podcasts[uris[1]].url,
+    function (err, feed) {
+
+      response.navigation.lists[0].title = feed.title;
+      response.navigation.lists[0].items = [];
+
+      self.podcastImage = feed.image.url;
+      //self.logger.info("ControllerPodcast::PODCAST:IMAGE:"+self.podcastImage);
+
+      feed.items.forEach(function (entry) {
+        //console.log(entry.title + ':' + entry.enclosure.url);
+        var podcastItem = {
+          service: self.serviceName,
+          type: 'podcast',
+          title: entry.title,
+          icon: 'fa fa-music',
+          uri: 'podcast/' + uris[1] + '/' + entry.enclosure.url
+        };
+        response.navigation.lists[0].items.push(podcastItem);
+      });
+      //self.logger.info("ControllerPodcast::PodcastArticle:RESULT:"+ JSON.stringify(response));
+      defer.resolve(response);
+    });
 
   return defer.promise;
 };
+
 
 ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
   var self = this;
@@ -316,18 +292,8 @@ ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
         self.getRadioI18nString('WAIT_FOR_RADIO_CHANNEL'));
 
       return self.mpdPlugin.sendMpdCommand('play', []).then(function () {
-        switch (track.radioType) {
-          case 'kbs':
-          case 'sbs':
-          case 'mbc':
-            return self.mpdPlugin.getState().then(function (state) {
-                return self.commandRouter.stateMachine.syncState(state, self.serviceName);
-            });
-            break;
-          default:
-            self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
-            return libQ.resolve();
-        }
+          self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
+          return libQ.resolve();
       })
     })
     .fail(function (e) {
@@ -351,12 +317,6 @@ ControllerPodcast.prototype.stop = function() {
       self.getRadioI18nString('STOP_RADIO_CHANNEL')
   );
 
-  self.logger.info("#######:STOP:CONSUME:"+self.commandRouter.stateMachine.isConsume);
-  self.logger.info("#######:STOP:SERVICE:"+self.commandRouter.stateMachine.consumeState.service);
-  if (self.commandRouter.stateMachine.consumeState.service === 'mpd')
-    serviceName = 'mpd';
-  else
-    serviceName = self.serviceName;
   serviceName = self.serviceName;
 
   return self.mpdPlugin.stop().then(function () {
@@ -372,12 +332,6 @@ ControllerPodcast.prototype.pause = function() {
   
   self.commandRouter.pushToastMessage('info', 'PERSONAL', 'pause');
 
-  self.logger.info("#######:PAUSE:CONSUME:"+self.commandRouter.stateMachine.isConsume);
-  self.logger.info("#######:PAUSE:SERVICE:"+self.commandRouter.stateMachine.consumeState.service);
-  if (self.commandRouter.stateMachine.consumeState.service === 'mpd')
-    serviceName = 'mpd';
-  else
-    serviceName = self.serviceName;
   serviceName = self.serviceName;
 
   return self.mpdPlugin.pause().then(function () {
@@ -393,12 +347,6 @@ ControllerPodcast.prototype.resume = function() {
 
   self.commandRouter.pushToastMessage('info', 'PERSONAL', 'resume');
 
-  self.logger.info("#######:RESUME:CONSUME:"+self.commandRouter.stateMachine.isConsume);
-  self.logger.info("#######:RESUME:SERVICE:"+self.commandRouter.stateMachine.consumeState.service);
-  if (self.commandRouter.stateMachine.consumeState.service === 'mpd')
-    serviceName = 'mpd';
-  else
-    serviceName = self.serviceName;
   serviceName = self.serviceName;
 
   return self.mpdPlugin.resume().then(function () {
@@ -411,179 +359,39 @@ ControllerPodcast.prototype.resume = function() {
 ControllerPodcast.prototype.explodeUri = function (uri) {
   var self = this;
   var defer = libQ.defer();
-  var uris = uri.split("/", 2);
-  var channel = parseInt(uris[1]);
+  var uris = uri.split("/");
   var response;
-  var query;
-  var station;
 
   self.logger.info("ControllerPodcast::explodeUri:"+uri);
-  station = uris[0].substring(3);
   response = {
       service: self.serviceName,
       type: 'track',
+      uri: uris[2],
       trackType: self.getRadioI18nString('PLUGIN_NAME'),
-      radioType: station,
+      radioType: 'podcast',
       samplerate: '',
       bitdepth: '',
-      albumart: '/albumart?sourceicon=music_service/personal_radio/logos/'+station+'.svg'
+      albumart: self.podcasts[uris[1]].image
   };
-
-  switch (uris[0]) {
-    case 'webkbs':
-      var userId = Math.random().toString(36).substring(2, 6) +
-                   Math.random().toString(36).substring(2, 6);
-      query = {
-        id: userId,
-        channel: channel+1
-      };
-      self.getStreamUrl(station, self.baseKbsStreamUrl, query)
-        .then(function (responseUrl) {
-          if (responseUrl  !== null) {
-            var result = responseUrl.split("\n");
-            var retCode = parseInt(result[0]);
-            var streamUrl;
-            if (retCode === 0)
-              streamUrl = result[1];
-            else {
-              streamUrl = null;
-              self.errorToast(station, 'INCORRECT_RESPONSE');
-            }
-
-            response["uri"] = streamUrl;
-            response["name"] = self.radioStations.kbs[channel].title;
-            response["title"] = self.radioStations.kbs[channel].title;
-          }
-          defer.resolve(response);
-        });
-      break;
-
-    case 'websbs':
-      var device;
-      if(self.sbsProtocol === true)
-        device = 'mobile';
-      else
-        device = 'pc';
-
-      var baseSbsStreamUrl = self.baseSbsStreamUrl + self.radioStations.sbs[channel].channel;
-      self.getStreamUrl(station, baseSbsStreamUrl, {device: device})
-        .then(function (responseUrl) {
-          if (responseUrl  !== null) {
-            var decipher = crypto.createDecipheriv(self.sbsAlgorithm, self.sbsKey, "");
-            var streamUrl = decipher.update(responseUrl, 'base64', 'utf8');
-            streamUrl += decipher.final('utf8');
-
-            response["uri"] = streamUrl;
-            response["name"] = self.radioStations.sbs[channel].title;
-            response["title"] = self.radioStations.sbs[channel].title;
-          }
-          defer.resolve(response);
-        });
-      break;
-
-    case 'webmbc':
-      var agent, protocol;
-      if(self.mbcProtocol === true) {
-        agent = 'android';
-        protocol = 'M3U8';
-      }
-      else {
-        agent = 'pc';
-        protocol = 'RTMP';
-      }
-
-      query = {
-        channel: self.radioStations.mbc[channel].channel,
-        agent: agent,
-        protocol: protocol
-      };
-      self.getStreamUrl(station, self.baseMbcStreamUrl, query)
-        .then(function (responseUrl) {
-          if (responseUrl  !== null) {
-            var result = JSON.parse(responseUrl.replace(/\(|\)|\;/g, ''));
-            var streamUrl = result.AACLiveURL;
-            if (streamUrl === undefined) {
-              streamUrl = null;
-              self.errorToast(station, 'INCORRECT_RESPONSE');
-            }
-
-            response["uri"] = streamUrl;
-            response["name"] = self.radioStations.mbc[channel].title;
-            response["title"] = self.radioStations.mbc[channel].title;
-          }
-          defer.resolve(response);
-        });
-      break;
-
-    case 'weblinn':
-      response["uri"] = self.radioStations.linn[channel].url;
-      response["name"] = self.radioStations.linn[channel].title;
-
-      defer.resolve(response);
-      break;
-
-    case 'webbbc':
-      response["uri"] = uri.match(/webbbc\/.\/(.*)/)[1];
-      response["name"] = 'BBC podcast';
-      response["albumart"] = self.podcastImage;
-      defer.resolve(response);
-      break;
-
-    default:
-      defer.resolve();
-  }
+  defer.resolve(response);
 
   return defer.promise;
 };
 
-// Stream and resource functions for Radio -----------------------------------
+// Stream and resource functions for Podcast -----------------------------------
 
-ControllerPodcast.prototype.getSecretKey = function (radioKeyUrl) {
-  var self = this;
-  var defer = libQ.defer();
+ControllerPodcast.prototype.addPodcast = function(data) {
+  var self=this;
 
-  var Request = unirest.get(radioKeyUrl);
-  Request.end (function (response) {
-    if (response.status === 200) {
-      var result = JSON.parse(response.body);
 
-      if (result !== undefined) {
-        defer.resolve(result);
-      } else {
-        self.commandRouter.pushToastMessage('error',
-            self.getRadioI18nString('PLUGIN_NAME'),
-            self.getRadioI18nString('ERROR_SECRET_KEY'));
+  self.logger.info("ControllerPodcast::addPodcast:" + data);
 
-        defer.resolve(null);
-      }
-    } else {
-      self.commandRouter.pushToastMessage('error',
-          self.getRadioI18nString('PLUGIN_NAME'),
-          self.getRadioI18nString('ERROR_SECRET_KEY_SERVER'));
-      defer.resolve(null);
-    }
-  });
-
-  return defer.promise;
 };
 
-ControllerPodcast.prototype.getStreamUrl = function (station, url, query) {
-  var self = this;
-  var defer = libQ.defer();
+ControllerPodcast.prototype.deletePodcast = function() {
+  var self=this;
 
-  var Request = unirest.get(url);
-  Request
-    .query(query)
-    .end(function (response) {
-      if (response.status === 200)
-        defer.resolve(response.body);
-      else {
-        defer.resolve(null);
-        self.errorToast(station, 'ERROR_STREAM_SERVER');
-      }
-    });
-
-  return defer.promise;
+  self.logger.info("ControllerPodcast::deletePodcast:");
 };
 
 ControllerPodcast.prototype.addPodcastsResource = function() {
@@ -613,16 +421,6 @@ ControllerPodcast.prototype.getRadioI18nString = function (key) {
     return self.i18nStrings[key];
   else
     return self.i18nStringsDefaults[key];
-};
-
-ControllerPodcast.prototype.decodeStreamUrl =
-    function (algorithm, secretKey, encodedUri) {
-
-  var decipherObj = crypto.createDecipher(algorithm, secretKey);
-  var streamUrl = decipherObj.update(encodedUri, 'hex', 'utf8');
-  streamUrl += decipherObj.final('utf8');
-
-  return streamUrl;
 };
 
 ControllerPodcast.prototype.errorToast = function (station, msg) {

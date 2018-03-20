@@ -16,12 +16,12 @@
       "saveButton": {
         "label": "TRANSLATE.CONFIG.SAVE",
         "data": [
-          "podcast_list"
+          "list_podcast"
         ]
       },
       "content": [
         {
-          "id": "podcast_list",
+          "id": "list_podcast",
           "element": "select",
           "label": "TRANSLATE.CONFIG.PODCAST_SELECT",
           "value": {
@@ -67,7 +67,7 @@
             "data": {
               "endpoint": "music_service/podcast",
               "method": "addPodcast",
-              "data": ""
+              "data": "add_podcast_input"
             }
           }
         }
