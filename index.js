@@ -161,16 +161,20 @@ ControllerPodcast.prototype.errorMessage = function(message) {
 
 ControllerPodcast.prototype.addPodcast = function(data) {
   var self=this;
-  var rssUrl = data['input_podcast'].value;
+  var rssUrl = data['input_podcast'];
 
   if ((rssUrl === null) || (rssUrl.length === 0)) {
     self.errorMessage('podcast rss feed url is wrong');
     return;
   }
 
-  rssUrl = rssUrl.trim();
-
   self.logger.info("ControllerPodcast::addPodcast:" + rssUrl);
+  var rssParser = new RssParser({
+    customFields: {
+      channel: ['image']
+    }
+  });
+
   rssParser.parseURL(rssUrl,
     function (err, feed) {
       var podcastImage, podcastItem;
@@ -193,7 +197,7 @@ ControllerPodcast.prototype.addPodcast = function(data) {
       };
       //self.logger.info("ControllerPodcast::PODCAST:IMAGE:"+self.podcastImage);
 
-      self.podcasts.push(podcastItem);
+      self.podcasts.items.push(podcastItem);
       fs.writeJsonSync(__dirname+'/podcasts_list.json', self.podcasts);
   });
 };

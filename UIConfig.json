@@ -4,17 +4,17 @@
   },
   "sections": [
     {
-      "id": "podcast",
+      "id": "delete_podcast",
       "element": "section",
-      "label": "TRANSLATE.CONFIG.PODCAST",
+      "label": "TRANSLATE.CONFIG.DELETE_PODCAST",
       "icon": "fa-cogs",
       "onSave": {
         "type": "controller",
-        "endpoint":"music_service/podcast",
-        "method":"updateConfig"
+        "endpoint": "music_service/podcast",
+        "method": "deletePodcast"
       },
       "saveButton": {
-        "label": "TRANSLATE.CONFIG.SAVE",
+        "label": "TRANSLATE.CONFIG.DELETE_PODCAST",
         "data": [
           "list_podcast"
         ]
@@ -35,21 +35,26 @@
               "value": ""
             }
           ]
-        },
-        {
-          "id": "delete_podcast",
-          "element": "button",
-          "label": "TRANSLATE.CONFIG.DELETE_PODCAST",
-          "onClick": {
-            "type": "emit",
-            "message": "callMethod",
-            "data": {
-              "endpoint": "music_service/podcast",
-              "method": "deletePodcast",
-              "data": ""
-            }
-          }
-        },
+        }
+      ]
+    },
+    {
+      "id": "insert_podcast",
+      "element": "section",
+      "label": "TRANSLATE.CONFIG.ADD_PODCAST",
+      "icon": "fa-cogs",
+      "onSave": {
+        "type": "controller",
+        "endpoint": "music_service/podcast",
+        "method": "addPodcast"
+      },
+      "saveButton": {
+        "label": "TRANSLATE.CONFIG.ADD_PODCAST",
+        "data": [
+          "input_podcast"
+        ]
+      },
+      "content": [
         {
           "id": "input_podcast",
           "type": "text",
@@ -57,20 +62,6 @@
           "label": "Add RSS url",
           "description": "Add podcast rss feed url address",
           "value": ""
-        },
-        {
-          "id": "add_podcast",
-          "element": "button",
-          "label": "TRANSLATE.CONFIG.ADD_PODCAST",
-          "onClick": {
-            "type": "emit",
-            "message": "callMethod",
-            "data": {
-              "endpoint": "music_service/podcast",
-              "method": "addPodcast",
-              "data": "input_podcast"
-            }
-          }
         }
       ]
     }
