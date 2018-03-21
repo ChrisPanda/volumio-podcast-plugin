@@ -1,6 +1,6 @@
 {
   "name": "podcast",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "description": "Podcast for Volumio2",
   "main": "index.js",
   "scripts": {
@@ -10,8 +10,8 @@
   "author": "Chris Song",
   "license": "ISC",
   "volumio_info": {
-    "prettyName": "Volumio Podcast",
-    "icon": "fa-headphones",
+    "prettyName": "Podcast",
+    "icon": "fa-podcast",
     "plugin_type": "music_service"
   },
   "dependencies": {

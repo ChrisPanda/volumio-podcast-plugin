@@ -1,6 +1,5 @@
 'use strict';
 
-
 var libQ = require('kew');
 var fs = require('fs-extra');
 var config = require('v-conf');
@@ -88,10 +87,10 @@ ControllerPodcast.prototype.getUIConfig = function() {
   .then(function(uiconf)
   {
     uiconf.sections[0].content[0].options = [];
-    for (var item in self.podcasts) {
+    for (var item in self.podcasts.items) {
       var podcastItem = {
-        label: item.title,
-        value:  item.title
+        label: self.podcasts.items[item].title,
+        value: self.podcasts.items[item].title
       };
       uiconf.sections[0].content[0].options.push(podcastItem);
     }
@@ -143,6 +142,33 @@ ControllerPodcast.prototype.updateConfig = function (data) {
   return defer.promise;
 };
 
+ControllerPodcast.prototype.addPodcast = function(data) {
+  var self=this;
+
+  self.logger.info("ControllerPodcast::addPodcast:" + data);
+  rssParser.parseURL(data,
+    function (err, feed) {
+      var podcastImage;
+      var title, description;
+
+      if (feed.itunes !== undefined)
+        podcastImage = feed.itunes.image;
+      if (feed.image !== undefined)
+        podcastImage = feed.image.url;
+
+      title = feed.title;
+      description = feed.description;
+      //self.logger.info("ControllerPodcast::PODCAST:IMAGE:"+self.podcastImage);
+
+    });
+};
+
+ControllerPodcast.prototype.deletePodcast = function() {
+  var self=this;
+
+  self.logger.info("ControllerPodcast::deletePodcast:");
+};
+
 // Playback Controls ---------------------------------------------------------
 ControllerPodcast.prototype.addToBrowseSources = function () {
   var self = this;
@@ -179,6 +205,7 @@ ControllerPodcast.prototype.getRootContent = function() {
   var response;
   var defer = libQ.defer();
 
+  //self.logger.info("ControllerPodcast::getRootContent:" + JSON.stringify(self.podcasts));
   response = {
     navigation: {
       lists: [
@@ -196,18 +223,17 @@ ControllerPodcast.prototype.getRootContent = function() {
   };
 
   response.navigation.lists[0].title = self.getRadioI18nString('PLUGIN_NAME');
-  response.navigation.lists[0].items = [];
-  for (var item in self.podcasts) {
+
+  self.podcasts.items.forEach(function (entry, index) {
     var podcast = {
       service: self.serviceName,
       type: 'folder',
-      title: item.title,
-      //icon: 'fa fa-folder-open-o',
-      uri: 'podcast/' + item.index,
-      albumart: item.image
+      title: entry.title,
+      uri: 'podcast/' + index,
+      albumart: entry.image
     };
     response.navigation.lists[0].items.push(podcast);
-  }
+  });
   defer.resolve(response);
   return defer.promise;
 };
@@ -223,12 +249,6 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
     }
   });
   var uris = uri.split('/');
-
-  self.commandRouter.pushToastMessage(
-      'info',
-      self.getRadioI18nString('PLUGIN_NAME'),
-      self.getRadioI18nString('WAIT_BBC_PODCAST_ITEMS')
-  );
 
   var response = {
     "navigation": {
@@ -247,22 +267,23 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
     }
   };
 
-  rssParser.parseURL(self.podcasts[uris[1]].url,
+  self.commandRouter.pushToastMessage(
+      'info',
+      self.getRadioI18nString('PLUGIN_NAME'),
+      self.getRadioI18nString('WAIT_PODCAST_ITEMS')
+  );
+
+  rssParser.parseURL(self.podcasts.items[uris[1]].url,
     function (err, feed) {
 
       response.navigation.lists[0].title = feed.title;
-      response.navigation.lists[0].items = [];
-
-      self.podcastImage = feed.image.url;
-      //self.logger.info("ControllerPodcast::PODCAST:IMAGE:"+self.podcastImage);
 
       feed.items.forEach(function (entry) {
-        //console.log(entry.title + ':' + entry.enclosure.url);
         var podcastItem = {
           service: self.serviceName,
-          type: 'podcast',
+          type: 'song',
           title: entry.title,
-          icon: 'fa fa-music',
+          icon: 'fa fa-podcast',
           uri: 'podcast/' + uris[1] + '/' + entry.enclosure.url
         };
         response.navigation.lists[0].items.push(podcastItem);
@@ -274,6 +295,25 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
   return defer.promise;
 };
 
+ControllerPodcast.prototype.explodeUri = function (uri) {
+  var self = this;
+  var defer = libQ.defer();
+  var uris = uri.split("/", 2);
+  var response;
+
+  self.logger.info("ControllerPodcast::explodeUri:"+uri);
+  response = {
+    service: self.serviceName,
+    type: 'track',
+    uri: uri.match(/podcast\/.\/(.*)/)[1],
+    trackType: self.getRadioI18nString('PLUGIN_NAME'),
+    name: self.podcasts.items[uris[1]].title,
+    albumart: self.podcasts.items[uris[1]].image
+  };
+  defer.resolve(response);
+
+  return defer.promise;
+};
 
 ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
   var self = this;
@@ -289,7 +329,7 @@ ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
     .then(function () {
       self.commandRouter.pushToastMessage('info',
         self.getRadioI18nString('PLUGIN_NAME'),
-        self.getRadioI18nString('WAIT_FOR_RADIO_CHANNEL'));
+        self.getRadioI18nString('WAIT_FOR_PODCAST_CHANNEL'));
 
       return self.mpdPlugin.sendMpdCommand('play', []).then(function () {
           self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
@@ -314,16 +354,18 @@ ControllerPodcast.prototype.stop = function() {
   self.commandRouter.pushToastMessage(
       'info',
       self.getRadioI18nString('PLUGIN_NAME'),
-      self.getRadioI18nString('STOP_RADIO_CHANNEL')
+      self.getRadioI18nString('STOP_PODCAST')
   );
 
+  /*
   serviceName = self.serviceName;
-
   return self.mpdPlugin.stop().then(function () {
     return self.mpdPlugin.getState().then(function (state) {
       return self.commandRouter.stateMachine.syncState(state, serviceName);
     });
   });
+  */
+  return self.mpdPlugin.sendMpdCommand('stop', []);
 };
 
 ControllerPodcast.prototype.pause = function() {
@@ -332,13 +374,17 @@ ControllerPodcast.prototype.pause = function() {
   
   self.commandRouter.pushToastMessage('info', 'PERSONAL', 'pause');
 
+  /*
   serviceName = self.serviceName;
-
   return self.mpdPlugin.pause().then(function () {
     return self.mpdPlugin.getState().then(function (state) {
       return self.commandRouter.stateMachine.syncState(state, serviceName);
     });
   });
+  */
+
+  self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
+  return self.mpdPlugin.sendMpdCommand('pause', []);
 };
 
 ControllerPodcast.prototype.resume = function() {
@@ -347,57 +393,25 @@ ControllerPodcast.prototype.resume = function() {
 
   self.commandRouter.pushToastMessage('info', 'PERSONAL', 'resume');
 
+  /*
   serviceName = self.serviceName;
-
   return self.mpdPlugin.resume().then(function () {
     return self.mpdPlugin.getState().then(function (state) {
       return self.commandRouter.stateMachine.syncState(state, serviceName);
     });
   });
+  */
+
+  self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
+  return self.mpdPlugin.sendMpdCommand('play', []);
 };
 
-ControllerPodcast.prototype.explodeUri = function (uri) {
-  var self = this;
-  var defer = libQ.defer();
-  var uris = uri.split("/");
-  var response;
 
-  self.logger.info("ControllerPodcast::explodeUri:"+uri);
-  response = {
-      service: self.serviceName,
-      type: 'track',
-      uri: uris[2],
-      trackType: self.getRadioI18nString('PLUGIN_NAME'),
-      radioType: 'podcast',
-      samplerate: '',
-      bitdepth: '',
-      albumart: self.podcasts[uris[1]].image
-  };
-  defer.resolve(response);
-
-  return defer.promise;
-};
-
-// Stream and resource functions for Podcast -----------------------------------
-
-ControllerPodcast.prototype.addPodcast = function(data) {
-  var self=this;
-
-
-  self.logger.info("ControllerPodcast::addPodcast:" + data);
-
-};
-
-ControllerPodcast.prototype.deletePodcast = function() {
-  var self=this;
-
-  self.logger.info("ControllerPodcast::deletePodcast:");
-};
-
+// resource functions for Podcast -----------------------------------
 ControllerPodcast.prototype.addPodcastsResource = function() {
   var self=this;
 
-  var podcastsResource = fs.readJsonSync(__dirname+'/podcast_list.json');
+  var podcastsResource = fs.readJsonSync(__dirname+'/podcasts_list.json');
   self.podcasts = podcastsResource.podcasts;
 };
 
@@ -422,14 +436,3 @@ ControllerPodcast.prototype.getRadioI18nString = function (key) {
   else
     return self.i18nStringsDefaults[key];
 };
-
-ControllerPodcast.prototype.errorToast = function (station, msg) {
-  var self=this;
-
-  var errorMessage = self.getRadioI18nString(msg);
-  errorMessage = errorMessage.replace('{0}', station.toUpperCase());
-  self.commandRouter.pushToastMessage('error',
-      self.getRadioI18nString('PLUGIN_NAME'), errorMessage);
-};
-
-

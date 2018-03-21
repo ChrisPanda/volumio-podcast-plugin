@@ -1,20 +1,14 @@
 {
   "PLUGIN_NAME": "Podcast",
-  "WAIT_FOR_RADIO_CHANNEL":"Please Wait for radio channel....",
-  "STOP_RADIO_CHANNEL": "Stopped personal radio channel",
-  "ERROR_STREAM_SERVER":  "There is a problem in {0} radio streaming server.",
-  "INCORRECT_RESPONSE":  "There is incorrect response from {0} radio streaming server.",
-  "ERROR_SECRET_KEY_SERVER": "There is a problem in Korean radio secret key server.",
-  "ERROR_SECRET_KEY": "Plugin can't get secretKey for Korean Radio URL",
-  "STOP_RADIO_STATION": "Please stop running radio station(SBS, MBC) and play again at MAIN radio menu to use changed radio protocol",
-  "WAIT_BBC_PODCAST_LIST": "Please wait BBC {0} radio podcast list",
-  "WAIT_BBC_PODCAST_ITEMS": "Please wait BBC radio podcast items",
-  "TITLE_KBS": "KBS Radio",
+  "WAIT_FOR_PODCAST_CHANNEL":"Please wait for podcast channel....",
+  "STOP_PODCAST": "Stopped podcast channel",
+  "WAIT_PODCAST_LIST": "Please wait {0} podcasts list",
+  "WAIT_PODCAST_ITEMS": "Please wait podcast items",
   "CONFIG": {
     "TITLE": "Podcast Configuration",
     "PODCAST": "Podcast",
     "SAVE": "Save",
-    "PODCAST_SELECT": "select podcast",
+    "LIST_PODCAST": "podcast list",
     "DELETE_PODCAST": "delete podcast",
     "ADD_PODCAST": "add podcast"
   }
