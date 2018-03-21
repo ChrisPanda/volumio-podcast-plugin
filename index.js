@@ -142,25 +142,60 @@ ControllerPodcast.prototype.updateConfig = function (data) {
   return defer.promise;
 };
 
-ControllerPodcast.prototype.addPodcast = function(data) {
+ControllerPodcast.prototype.errorMessage = function(message) {
   var self=this;
 
-  self.logger.info("ControllerPodcast::addPodcast:" + data);
-  rssParser.parseURL(data,
+  var modalData = {
+    title: 'Podcast Message',
+    message: message,
+    size: 'lg',
+    buttons: [
+      {
+        name: 'Close',
+        class: 'btn btn-info'
+      }
+    ]
+  };
+  self.commandRouter.broadcastMessage("openModal", modalData);
+};
+
+ControllerPodcast.prototype.addPodcast = function(data) {
+  var self=this;
+  var rssUrl = data['input_podcast'].value;
+
+  if ((rssUrl === null) || (rssUrl.length === 0)) {
+    self.errorMessage('podcast rss feed url is wrong');
+    return;
+  }
+
+  rssUrl = rssUrl.trim();
+
+  self.logger.info("ControllerPodcast::addPodcast:" + rssUrl);
+  rssParser.parseURL(rssUrl,
     function (err, feed) {
-      var podcastImage;
-      var title, description;
+      var podcastImage, podcastItem;
+
+      if (err) {
+        self.errorMessage('podcast rss parsing problem');
+        return;
+      }
 
       if (feed.itunes !== undefined)
         podcastImage = feed.itunes.image;
       if (feed.image !== undefined)
         podcastImage = feed.image.url;
 
-      title = feed.title;
-      description = feed.description;
+      podcastItem = {
+        title: feed.title,
+        url: rssUrl,
+        description: feed.description,
+        image: podcastImage
+      };
       //self.logger.info("ControllerPodcast::PODCAST:IMAGE:"+self.podcastImage);
 
-    });
+      self.podcasts.push(podcastItem);
+      fs.writeJsonSync(__dirname+'/podcasts_list.json', self.podcasts);
+  });
 };
 
 ControllerPodcast.prototype.deletePodcast = function() {

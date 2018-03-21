@@ -51,7 +51,7 @@
           }
         },
         {
-          "id": "add_podcast_input",
+          "id": "input_podcast",
           "type": "text",
           "element": "input",
           "label": "Add RSS url",
@@ -68,7 +68,7 @@
             "data": {
               "endpoint": "music_service/podcast",
               "method": "addPodcast",
-              "data": "add_podcast_input"
+              "data": "input_podcast"
             }
           }
         }
