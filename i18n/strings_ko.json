@@ -6,8 +6,10 @@
   "PODCAST_URL_PROBLEM": "팟캐스트 url 오류",
   "PODCAST_URL_PARSING_PROBLEM": "팟캐스트 본문 조회 오류",
   "CLOSE": "닫기",
-  "PODCAST_ADD_COMPLETION": "팟캐스트 항목이 추가되엇습니다.",
-  "PODCAST_DELETE_COMPLETION": "팟캐스트 항목이 삭제되엇습니다.",
+  "PODCAST_ADD_COMPLETION": "팟캐스트 항목이 추가되엇습니다. 변경된 항목을 보기위해서 페이지를 다시 로드하여 주세요.",
+  "PODCAST_DELETE_COMPLETION": "팟캐스트 항목이 삭제되엇습니다. 변경된 항목을 보기위해서 페이지를 다시 로드하여 주세요.",
+  "DELETE_PODCAST_DESCRIPTION": "팟캐스트 목록에서 삭제할 항목을 선택하세요.",
+  "ADD_PODCAST_DESCRIPTION": "등록할 팟캐스트 RSS 연결 url을 입력하여 주세요.(예:[TED Radio Hour Podcast] https://www.npr.org/rss/podcast.php?id=510298)",
   "CONFIG": {
     "TITLE": "팟캐스트 설정",
     "PODCAST": "팟캐스트",

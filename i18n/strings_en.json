@@ -6,8 +6,10 @@
   "PODCAST_URL_PROBLEM": "illegal podcast url",
   "PODCAST_URL_PARSING_PROBLEM": "error in parsing podcast url",
   "CLOSE": "Close",
-  "PODCAST_ADD_COMPLETION": "podcast item is added",
-  "PODCAST_DELETE_COMPLETION": "podcast item is removed",
+  "PODCAST_ADD_COMPLETION": "Podcast item is added. Please refresh the page to see updated items.",
+  "PODCAST_DELETE_COMPLETION": "Podcast item is removed. Please refresh the page to see updated items.",
+  "DELETE_PODCAST_DESCRIPTION": "You should select podcast to delete item from podcasts list",
+  "ADD_PODCAST_DESCRIPTION": "You should input podcast RSS link url to add.(Example:[TED Radio Hour Podcast] https://www.npr.org/rss/podcast.php?id=510298)",
   "CONFIG": {
     "TITLE": "Podcast Configuration",
     "PODCAST": "Podcast",

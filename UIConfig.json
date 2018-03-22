@@ -23,6 +23,7 @@
         {
           "id": "list_podcast",
           "element": "select",
+          "description": "TRANSLATE.CONFIG.DELETE_PODCAST_DESCRIPTION",
           "label": "TRANSLATE.CONFIG.LIST_PODCAST",
           "value": {},
           "options": []
@@ -50,8 +51,8 @@
           "id": "input_podcast",
           "type": "text",
           "element": "input",
+          "description":  "TRANSLATE.CONFIG.ADD_PODCAST_DESCRIPTION",
           "label":  "TRANSLATE.CONFIG.REGISTER_PODCAST",
-          "description": "TRANSLATE.CONFIG.ADD_PODCAST_DESCRIPTION",
           "value": ""
         }
       ]
