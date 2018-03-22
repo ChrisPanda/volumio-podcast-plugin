@@ -8,6 +8,7 @@
       "element": "section",
       "label": "TRANSLATE.CONFIG.DELETE_PODCAST",
       "icon": "fa-cogs",
+      "description": "TRANSLATE.CONFIG.DELETE_PODCAST_DESCRIPTION",
       "onSave": {
         "type": "controller",
         "endpoint": "music_service/podcast",
@@ -23,7 +24,6 @@
         {
           "id": "list_podcast",
           "element": "select",
-          "description": "TRANSLATE.CONFIG.DELETE_PODCAST_DESCRIPTION",
           "label": "TRANSLATE.CONFIG.LIST_PODCAST",
           "value": {},
           "options": []
@@ -35,6 +35,7 @@
       "element": "section",
       "label": "TRANSLATE.CONFIG.ADD_PODCAST",
       "icon": "fa-cogs",
+      "description":  "TRANSLATE.CONFIG.ADD_PODCAST_DESCRIPTION",
       "onSave": {
         "type": "controller",
         "endpoint": "music_service/podcast",
@@ -51,7 +52,6 @@
           "id": "input_podcast",
           "type": "text",
           "element": "input",
-          "description":  "TRANSLATE.CONFIG.ADD_PODCAST_DESCRIPTION",
           "label":  "TRANSLATE.CONFIG.REGISTER_PODCAST",
           "value": ""
         }
