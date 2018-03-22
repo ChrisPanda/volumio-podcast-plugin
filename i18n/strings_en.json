@@ -3,6 +3,10 @@
   "WAIT_PODCAST_CHANNEL":"Please wait for podcast channel",
   "WAIT_PODCAST_ITEMS": "Please wait {0} podcasts list",
   "STOP_PODCAST": "Stopped podcast channel",
+  "ERROR_TITLE": "Podcast Error",
+  "PODCAST_URL_PROBLEM": "illegal podcast url",
+  "PODCAST_URL_PARSING_PROBLEM": "error in parsing podcast url",
+  "CLOSE": "Close",
   "CONFIG": {
     "TITLE": "Podcast Configuration",
     "PODCAST": "Podcast",

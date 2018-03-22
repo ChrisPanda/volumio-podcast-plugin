@@ -3,6 +3,10 @@
   "WAIT_PODCAST_CHANNEL":"팟캐스트 채널 스트림 준비중. 잠시 기다려 주세요.",
   "WAIT_PODCAST_ITEMS": "{0} 팟캐스트 목록 조회중입니다.",
   "STOP_PODCAST": "팟캐스트 재생을 중지합니다.",
+  "ERROR_TITLE": "팟캐스트 오류",
+  "PODCAST_URL_PROBLEM": "팟캐스트 url 오류",
+  "PODCAST_URL_PARSING_PROBLEM": "팟캐스트 본문 조회 오류",
+  "CLOSE": "닫기",
   "CONFIG": {
     "TITLE": "팟캐스트 설정",
     "PODCAST": "팟캐스트",
