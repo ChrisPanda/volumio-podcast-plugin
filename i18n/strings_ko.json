@@ -20,7 +20,7 @@
     "ADD_PODCAST": "팟캐스트 추가",
     "ADD_PODCAST_NOTE": "팟캐스트 주소를 입력",
     "REGISTER_PODCAST": "팟캐스트 등록",
-    "DELETE_PODCAST_DESCRIPTION": "팟캐스트 리스트에서 삭제할 항목을 선택하세요.",
-    "ADD_PODCAST_DESCRIPTION": "등록할 팟캐스트 RSS 연결 url을 입력하여 주세요.(예: TED Radio Hour Podcast RSS 주소 - https://www.npr.org/rss/podcast.php?id=510298)"
+    "DELETE_PODCAST_DESCRIPTION": "팟캐스트 리스트에서 삭제할 팟캐스트 항목을 선택하세요.",
+    "ADD_PODCAST_DESCRIPTION": "추가할 팟캐스트 RSS 연결 url을 입력하여 주세요.(예: TED Radio Hour Podcast RSS 주소 - https://www.npr.org/rss/podcast.php?id=510298)"
   }
 }
