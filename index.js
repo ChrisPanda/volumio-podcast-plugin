@@ -78,7 +78,7 @@ ControllerPodcast.prototype.setConf = function(conf) {
 ControllerPodcast.prototype.getUIConfig = function() {
   var self = this;
   var defer = libQ.defer();
-  var lang_code = this.commandRouter.sharedVars.get('language_code');
+  var lang_code = self.commandRouter.sharedVars.get('language_code');
 
   self.getConf(this.configFile);
   self.commandRouter.i18nJson(__dirname+'/i18n/strings_' + lang_code + '.json',
@@ -86,14 +86,13 @@ ControllerPodcast.prototype.getUIConfig = function() {
       __dirname + '/UIConfig.json')
   .then(function(uiconf)
   {
-    uiconf.sections[0].content[0].options = [];
-    for (var item in self.podcasts.items) {
+    self.podcasts.items.forEach(function (entry) {
       var podcastItem = {
-        label: self.podcasts.items[item].title,
-        value: self.podcasts.items[item].title
+        label: entry.title,
+        value: entry.id
       };
       uiconf.sections[0].content[0].options.push(podcastItem);
-    }
+    });
     uiconf.sections[0].content[0].value = uiconf.sections[0].content[0].options[0];
 
     defer.resolve(uiconf);
@@ -115,33 +114,6 @@ ControllerPodcast.prototype.setUIConfig = function(data)
   return libQ.resolve();
 };
 
-ControllerPodcast.prototype.updateConfig = function (data) {
-  var self = this;
-  var defer = libQ.defer();
-  var configUpdated = false;
-
-  if (self.config.get('sbsProtocol') != data['sbsProtocol']) {
-    self.config.set('sbsProtocol', data['sbsProtocol']);
-    self.sbsProtocol = data['sbsProtocol'];
-    configUpdated = true;
-  }
-  if(configUpdated) {
-    var responseData = {
-      title: self.getRadioI18nString('PLUGIN_NAME'),
-      message: self.getRadioI18nString('STOP_RADIO_STATION'),
-      size: 'md',
-      buttons: [{
-        name: 'Close',
-        class: 'btn btn-info'
-      }]
-    };
-
-    self.commandRouter.broadcastMessage("openModal", responseData);
-  }
-
-  return defer.promise;
-};
-
 ControllerPodcast.prototype.errorMessage = function(message) {
   var self=this;
 
@@ -159,12 +131,41 @@ ControllerPodcast.prototype.errorMessage = function(message) {
   self.commandRouter.broadcastMessage("openModal", modalData);
 };
 
+ControllerPodcast.prototype.updatePodcastUrls = function() {
+  var self=this;
+
+  var lang_code = self.commandRouter.sharedVars.get('language_code');
+  self.commandRouter.i18nJson(__dirname+'/i18n/strings_' + lang_code + '.json',
+      __dirname + '/i18n/strings_en.json',
+      __dirname + '/UIConfig.json')
+  .then(function(uiconf)
+  {
+    self.podcasts.items.forEach(function (entry) {
+      self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
+        label: entry.title,
+        value: entry.id
+      });
+    });
+    self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value', {
+      value: self.podcasts.items[0].title,
+      label: self.podcasts.items[0].title
+    });
+
+    fs.writeJsonSync(__dirname+'/podcasts_list.json', self.podcasts);
+  })
+  .fail(function()
+  {
+    new Error();
+  });
+};
+
 ControllerPodcast.prototype.addPodcast = function(data) {
   var self=this;
+  var defer = libQ.defer();
   var rssUrl = data['input_podcast'];
 
   if ((rssUrl === null) || (rssUrl.length === 0)) {
-    self.errorMessage('podcast rss feed url is wrong');
+    self.errorMessage('podcast feed url is wrong');
     return;
   }
 
@@ -180,7 +181,7 @@ ControllerPodcast.prototype.addPodcast = function(data) {
       var podcastImage, podcastItem;
 
       if (err) {
-        self.errorMessage('podcast rss parsing problem');
+        self.errorMessage('podcast feed url parsing problem');
         return;
       }
 
@@ -190,22 +191,34 @@ ControllerPodcast.prototype.addPodcast = function(data) {
         podcastImage = feed.image.url;
 
       podcastItem = {
+        id: Math.random().toString(36).substring(2, 10) +
+            Math.random().toString(36).substring(2, 10),
         title: feed.title,
         url: rssUrl,
-        description: feed.description,
         image: podcastImage
       };
       //self.logger.info("ControllerPodcast::PODCAST:IMAGE:"+self.podcastImage);
 
       self.podcasts.items.push(podcastItem);
-      fs.writeJsonSync(__dirname+'/podcasts_list.json', self.podcasts);
+      self.updatePodcastUrls();
   });
+
+  return defer.promise;
 };
 
-ControllerPodcast.prototype.deletePodcast = function() {
+ControllerPodcast.prototype.deletePodcast = function(data) {
   var self=this;
 
-  self.logger.info("ControllerPodcast::deletePodcast:");
+  var id = data['input_podcast'].value;
+
+  self.logger.info("ControllerPodcast::deletePodcast:"+JSON.stringify(data));
+
+  self.podcasts.items = _.remove(self.podcasts.items, function(item) {
+    return item.id !== id;
+  });
+  self.logger.info("ControllerPodcast::DELETE:"+JSON.stringify(self.podcasts.items));
+
+  self.updatePodcastUrls();
 };
 
 // Playback Controls ---------------------------------------------------------
@@ -450,8 +463,7 @@ ControllerPodcast.prototype.resume = function() {
 ControllerPodcast.prototype.addPodcastsResource = function() {
   var self=this;
 
-  var podcastsResource = fs.readJsonSync(__dirname+'/podcasts_list.json');
-  self.podcasts = podcastsResource.podcasts;
+  self.podcasts = fs.readJsonSync(__dirname+'/podcasts_list.json');
 };
 
 ControllerPodcast.prototype.loadRadioI18nStrings = function () {

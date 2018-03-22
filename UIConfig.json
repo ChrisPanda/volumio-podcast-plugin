@@ -24,17 +24,8 @@
           "id": "list_podcast",
           "element": "select",
           "label": "TRANSLATE.CONFIG.LIST_PODCAST",
-          "description": "",
-          "value": {
-            "label": "",
-            "value": ""
-          },
-          "options": [
-            {
-              "label": "",
-              "value": ""
-            }
-          ]
+          "value": {},
+          "options": []
         }
       ]
     },
