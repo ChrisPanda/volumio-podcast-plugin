@@ -8,6 +8,7 @@
   "CLOSE": "Close",
   "CANCEL": "Cancel",
   "CONFIRM": "Confirm",
+  "DELETE_CONFIRM_MESSAGE": "Do you want to delete {0} podcast?",
   "PODCAST_ADD_COMPLETION": "Podcast item is added.",
   "PODCAST_DELETE_COMPLETION": "Podcast item is removed.",
   "RELOAD_PAGE": "Please refresh the page to see updated items.",
@@ -20,6 +21,6 @@
     "ADD_PODCAST_NOTE": "input podcast RSS feed link url",
     "REGISTER_PODCAST": "register podcast",
     "DELETE_PODCAST_DESCRIPTION": "You should select podcast to delete item from podcasts list",
-    "ADD_PODCAST_DESCRIPTION": "You should input podcast RSS link url to add.(Example:[TED Radio Hour Podcast] https://www.npr.org/rss/podcast.php?id=510298)"
+    "ADD_PODCAST_DESCRIPTION": "You should input podcast RSS link url to add.(Example: TED Radio Hour Podcast's RSS link url - https://www.npr.org/rss/podcast.php?id=510298)"
   }
 }

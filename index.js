@@ -165,11 +165,7 @@ ControllerPodcast.prototype.addPodcast = function(data) {
           self.getPodcastI18nString('PLUGIN_NAME'),
           self.getPodcastI18nString('PODCAST_ADD_COMPLETION')
       );
-      self.commandRouter.pushToastMessage(
-          'info',
-          self.getPodcastI18nString('PLUGIN_NAME'),
-          self.getPodcastI18nString('RELOAD_PAGE')
-      );
+      self.showDialogMessage(self.getPodcastI18nString('RELOAD_PAGE'));
   });
 
   return defer.promise;
@@ -178,7 +174,11 @@ ControllerPodcast.prototype.addPodcast = function(data) {
 ControllerPodcast.prototype.deletePodcast = function(data) {
   var self = this;
   var id = data['list_podcast'].value;
+  var title = data['list_podcast'].label;
   self.logger.info("ControllerPodcast::deletePodcast:ID:" + id);
+
+  var message = self.getPodcastI18nString('DELETE_CONFIRM_MESSAGE');
+  message = message.replace('{0}', title);
 
   var modalData = {
     title: self.getPodcastI18nString('PLUGIN_NAME'),
@@ -214,11 +214,7 @@ ControllerPodcast.prototype.deletePodcastConfirm = function(id) {
       self.getPodcastI18nString('PLUGIN_NAME'),
       self.getPodcastI18nString('PODCAST_DELETE_COMPLETION')
   );
-  self.commandRouter.pushToastMessage(
-      'info',
-      self.getPodcastI18nString('PLUGIN_NAME'),
-      self.getPodcastI18nString('RELOAD_PAGE')
-  );
+  self.showDialogMessage(self.getPodcastI18nString('RELOAD_PAGE'));
 };
 
 ControllerPodcast.prototype.updatePodcastUrls = function() {
