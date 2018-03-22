@@ -53,7 +53,8 @@
           "type": "text",
           "element": "input",
           "label":  "TRANSLATE.CONFIG.REGISTER_PODCAST",
-          "value": ""
+          "value": "",
+          "description": "TRANSLATE.CONFIG.ADD_PODCAST_NOTE"
         }
       ]
     }

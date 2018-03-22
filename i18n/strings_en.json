@@ -1,22 +1,25 @@
 {
   "PLUGIN_NAME": "Podcast",
   "WAIT_PODCAST_CHANNEL":"Please wait for podcast channel",
-  "WAIT_PODCAST_ITEMS": "Please wait {0} podcasts list",
+  "WAIT_PODCAST_ITEMS": "Please wait for {0} podcast items",
   "STOP_PODCAST": "Stopped podcast channel",
   "PODCAST_URL_PROBLEM": "illegal podcast url",
-  "PODCAST_URL_PARSING_PROBLEM": "error in parsing podcast url",
+  "PODCAST_URL_PARSING_PROBLEM": "error in parsing podcast RSS link url",
   "CLOSE": "Close",
-  "PODCAST_ADD_COMPLETION": "Podcast item is added. Please refresh the page to see updated items.",
-  "PODCAST_DELETE_COMPLETION": "Podcast item is removed. Please refresh the page to see updated items.",
-  "DELETE_PODCAST_DESCRIPTION": "You should select podcast to delete item from podcasts list",
-  "ADD_PODCAST_DESCRIPTION": "You should input podcast RSS link url to add.(Example:[TED Radio Hour Podcast] https://www.npr.org/rss/podcast.php?id=510298)",
+  "CANCEL": "Cancel",
+  "CONFIRM": "Confirm",
+  "PODCAST_ADD_COMPLETION": "Podcast item is added.",
+  "PODCAST_DELETE_COMPLETION": "Podcast item is removed.",
+  "RELOAD_PAGE": "Please refresh the page to see updated items.",
   "CONFIG": {
     "TITLE": "Podcast Configuration",
     "PODCAST": "Podcast",
     "LIST_PODCAST": "podcast list",
     "DELETE_PODCAST": "delete podcast",
     "ADD_PODCAST": "add podcast",
-    "ADD_PODCAST_DESCRIPTION": "input podcast url",
-    "REGISTER_PODCAST": "register podcast"
+    "ADD_PODCAST_NOTE": "input podcast RSS feed link url",
+    "REGISTER_PODCAST": "register podcast",
+    "DELETE_PODCAST_DESCRIPTION": "You should select podcast to delete item from podcasts list",
+    "ADD_PODCAST_DESCRIPTION": "You should input podcast RSS link url to add.(Example:[TED Radio Hour Podcast] https://www.npr.org/rss/podcast.php?id=510298)"
   }
 }

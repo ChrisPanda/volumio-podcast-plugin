@@ -165,17 +165,43 @@ ControllerPodcast.prototype.addPodcast = function(data) {
           self.getPodcastI18nString('PLUGIN_NAME'),
           self.getPodcastI18nString('PODCAST_ADD_COMPLETION')
       );
+      self.commandRouter.pushToastMessage(
+          'info',
+          self.getPodcastI18nString('PLUGIN_NAME'),
+          self.getPodcastI18nString('RELOAD_PAGE')
+      );
   });
 
   return defer.promise;
 };
 
 ControllerPodcast.prototype.deletePodcast = function(data) {
-  var self=this;
-
+  var self = this;
   var id = data['list_podcast'].value;
+  self.logger.info("ControllerPodcast::deletePodcast:ID:" + id);
 
-  self.logger.info("ControllerPodcast::deletePodcast:ID:"+id);
+  var modalData = {
+    title: self.getPodcastI18nString('PLUGIN_NAME'),
+    message: message,
+    size: 'md',
+    buttons: [
+      {
+        name: self.getPodcastI18nString('CANCEL'),
+        class: 'btn btn-info'
+      },
+      {
+        name: self.getPodcastI18nString('CONFIRM'),
+        class: 'btn btn-info',
+        emit: 'deletePodcastConfirm',
+        payload: id
+      }
+    ]
+  };
+  self.commandRouter.broadcastMessage("openModal", modalData);
+};
+
+ControllerPodcast.prototype.deletePodcastConfirm = function(id) {
+  var self=this;
 
   self.podcasts.items = _.remove(self.podcasts.items, function(item) {
     return item.id !== id;
@@ -187,6 +213,11 @@ ControllerPodcast.prototype.deletePodcast = function(data) {
       'info',
       self.getPodcastI18nString('PLUGIN_NAME'),
       self.getPodcastI18nString('PODCAST_DELETE_COMPLETION')
+  );
+  self.commandRouter.pushToastMessage(
+      'info',
+      self.getPodcastI18nString('PLUGIN_NAME'),
+      self.getPodcastI18nString('RELOAD_PAGE')
   );
 };
 
@@ -224,7 +255,6 @@ ControllerPodcast.prototype.showDialogMessage = function(message) {
   };
   self.commandRouter.broadcastMessage("openModal", modalData);
 };
-
 
 // Playback Controls ---------------------------------------------------------
 ControllerPodcast.prototype.addToBrowseSources = function () {
