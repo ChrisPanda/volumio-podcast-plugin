@@ -50,8 +50,8 @@
           "id": "input_podcast",
           "type": "text",
           "element": "input",
-          "label": "Add RSS url",
-          "description": "Add podcast rss feed url address",
+          "label":  "TRANSLATE.CONFIG.REGISTER_PODCAST",
+          "description": "TRANSLATE.CONFIG.ADD_PODCAST_DESCRIPTION",
           "value": ""
         }
       ]

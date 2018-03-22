@@ -1,15 +1,15 @@
 {
   "PLUGIN_NAME": "팟캐스트",
-  "WAIT_FOR_PODCAST_CHANNEL":"팟캐스트 채널 스트림 준비중. 잠시 기다려 주세요....",
+  "WAIT_PODCAST_CHANNEL":"팟캐스트 채널 스트림 준비중. 잠시 기다려 주세요.",
+  "WAIT_PODCAST_ITEMS": "{0} 팟캐스트 목록 조회중입니다.",
   "STOP_PODCAST": "팟캐스트 재생을 중지합니다.",
-  "WAIT_PODCAST_LIST": "{0} 팟캐스트 목록 조회중입니다.",
-  "WAIT_PODCAST_ITEMS": "팟캐스트 아이템 조회중입니다.",
   "CONFIG": {
     "TITLE": "팟캐스트 설정",
     "PODCAST": "팟캐스트",
-    "SAVE": "저장",
     "LIST_PODCAST": "팟캐스트 리스트",
     "DELETE_PODCAST": "팟캐스트 삭제",
-    "ADD_PODCAST": "팟캐스트 추가"
+    "ADD_PODCAST": "팟캐스트 추가",
+    "ADD_PODCAST_DESCRIPTION": "팟캐스트 주소를 입력",
+    "REGISTER_PODCAST": "팟캐스트 등록"
   }
 }

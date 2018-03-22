@@ -4,6 +4,7 @@ var libQ = require('kew');
 var fs = require('fs-extra');
 var config = require('v-conf');
 var RssParser = require('rss-parser');
+var _ = require('lodash');
 
 module.exports = ControllerPodcast;
 
@@ -209,9 +210,9 @@ ControllerPodcast.prototype.addPodcast = function(data) {
 ControllerPodcast.prototype.deletePodcast = function(data) {
   var self=this;
 
-  var id = data['input_podcast'].value;
+  var id = data['list_podcast'].value;
 
-  self.logger.info("ControllerPodcast::deletePodcast:"+JSON.stringify(data));
+  self.logger.info("ControllerPodcast::deletePodcast:ID:"+id);
 
   self.podcasts.items = _.remove(self.podcasts.items, function(item) {
     return item.id !== id;
@@ -319,10 +320,12 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
     }
   };
 
+  var message = self.getRadioI18nString('WAIT_PODCAST_ITEMS');
+  message = message.replace('{0}', self.podcasts.items[uris[1]].title);
   self.commandRouter.pushToastMessage(
       'info',
       self.getRadioI18nString('PLUGIN_NAME'),
-      self.getRadioI18nString('WAIT_PODCAST_ITEMS')
+      message
   );
 
   rssParser.parseURL(self.podcasts.items[uris[1]].url,
@@ -381,7 +384,7 @@ ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
     .then(function () {
       self.commandRouter.pushToastMessage('info',
         self.getRadioI18nString('PLUGIN_NAME'),
-        self.getRadioI18nString('WAIT_FOR_PODCAST_CHANNEL'));
+        self.getRadioI18nString('WAIT_PODCAST_CHANNEL'));
 
       return self.mpdPlugin.sendMpdCommand('play', []).then(function () {
           self.commandRouter.stateMachine.setConsumeUpdateService('mpd');

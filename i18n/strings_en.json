@@ -1,15 +1,15 @@
 {
   "PLUGIN_NAME": "Podcast",
-  "WAIT_FOR_PODCAST_CHANNEL":"Please wait for podcast channel....",
+  "WAIT_PODCAST_CHANNEL":"Please wait for podcast channel",
+  "WAIT_PODCAST_ITEMS": "Please wait {0} podcasts list",
   "STOP_PODCAST": "Stopped podcast channel",
-  "WAIT_PODCAST_LIST": "Please wait {0} podcasts list",
-  "WAIT_PODCAST_ITEMS": "Please wait podcast items",
   "CONFIG": {
     "TITLE": "Podcast Configuration",
     "PODCAST": "Podcast",
-    "SAVE": "Save",
     "LIST_PODCAST": "podcast list",
     "DELETE_PODCAST": "delete podcast",
-    "ADD_PODCAST": "add podcast"
+    "ADD_PODCAST": "add podcast",
+    "ADD_PODCAST_DESCRIPTION": "input podcast url",
+    "REGISTER_PODCAST": "register podcast"
   }
 }
