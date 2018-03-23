@@ -11,7 +11,6 @@
   "DELETE_CONFIRM_MESSAGE": "{0} 팟캐스트를 삭제 하시겠습니까?",
   "PODCAST_ADD_COMPLETION": "팟캐스트 항목이 추가되엇습니다.",
   "PODCAST_DELETE_COMPLETION": "팟캐스트 항목이 삭제되엇습니다.",
-  "RELOAD_PAGE": "변경된 항목을 보기위해서 페이지를 다시 로드하여 주세요.",
   "CONFIG": {
     "TITLE": "팟캐스트 설정",
     "PODCAST": "팟캐스트",

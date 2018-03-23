@@ -165,7 +165,6 @@ ControllerPodcast.prototype.addPodcast = function(data) {
           self.getPodcastI18nString('PLUGIN_NAME'),
           self.getPodcastI18nString('PODCAST_ADD_COMPLETION')
       );
-      self.showDialogMessage(self.getPodcastI18nString('RELOAD_PAGE'));
   });
 
   return defer.promise;
@@ -203,11 +202,11 @@ ControllerPodcast.prototype.deletePodcast = function(data) {
 ControllerPodcast.prototype.deletePodcastConfirm = function(id) {
   var self=this;
 
-  self.logger.info("ControllerPodcast::DELETE_CONFIRM:"+id);
+  //self.logger.info("ControllerPodcast::DELETE_CONFIRM:"+id);
   self.podcasts.items = _.remove(self.podcasts.items, function(item) {
     return item.id !== id;
   });
-  self.logger.info("ControllerPodcast::DELETE:"+JSON.stringify(self.podcasts.items));
+  //self.logger.info("ControllerPodcast::DELETE:"+JSON.stringify(self.podcasts.items));
 
   self.updatePodcastUrls();
   self.commandRouter.pushToastMessage(
@@ -215,25 +214,34 @@ ControllerPodcast.prototype.deletePodcastConfirm = function(id) {
       self.getPodcastI18nString('PLUGIN_NAME'),
       self.getPodcastI18nString('PODCAST_DELETE_COMPLETION')
   );
-  self.showDialogMessage(self.getPodcastI18nString('RELOAD_PAGE'));
 };
 
 ControllerPodcast.prototype.updatePodcastUrls = function() {
   var self=this;
 
-  var uiconf = fs.readJsonSync(__dirname+'/UIConfig.json');
-  self.podcasts.items.forEach(function (entry) {
-    self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
-      label: entry.title,
-      value: entry.id
+  var lang_code = self.commandRouter.sharedVars.get('language_code');
+  self.commandRouter.i18nJson(__dirname+'/i18n/strings_' + lang_code + '.json',
+      __dirname + '/i18n/strings_en.json',
+      __dirname + '/UIConfig.json')
+  .then(function(uiconf)
+  {
+    self.podcasts.items.forEach(function (entry) {
+      self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
+        label: entry.title,
+        value: entry.id
+      });
     });
+    self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value', {
+      value: self.podcasts.items[0].title,
+      label: self.podcasts.items[0].title
+    });
+    self.commandRouter.broadcastMessage('pushUiConfig', uiconf);
+    fs.writeJsonSync(__dirname+'/podcasts_list.json', self.podcasts);
+  })
+  .fail(function()
+  {
+    new Error();
   });
-  self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value', {
-    value: self.podcasts.items[0].title,
-    label: self.podcasts.items[0].title
-  });
-
-  fs.writeJsonSync(__dirname+'/podcasts_list.json', self.podcasts);
 };
 
 ControllerPodcast.prototype.showDialogMessage = function(message) {

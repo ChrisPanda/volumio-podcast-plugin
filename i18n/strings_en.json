@@ -11,7 +11,6 @@
   "DELETE_CONFIRM_MESSAGE": "Do you want to delete {0} podcast?",
   "PODCAST_ADD_COMPLETION": "Podcast item is added.",
   "PODCAST_DELETE_COMPLETION": "Podcast item is removed.",
-  "RELOAD_PAGE": "Please refresh the page to see updated items.",
   "CONFIG": {
     "TITLE": "Podcast Configuration",
     "PODCAST": "Podcast",
