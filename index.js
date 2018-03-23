@@ -186,10 +186,12 @@ ControllerPodcast.prototype.addPodcast = function(data) {
       self.podcasts.items.push(podcastItem);
       self.updateUIConfig();
 
+      var message = self.getPodcastI18nString('ADD_PODCAST_COMPLETION');
+      message = message.replace('{0}', feed.title);
       self.commandRouter.pushToastMessage(
           'info',
           self.getPodcastI18nString('PLUGIN_NAME'),
-          self.getPodcastI18nString('ADD_PODCAST_COMPLETION')
+          message
       );
   });
 
@@ -217,25 +219,27 @@ ControllerPodcast.prototype.deletePodcast = function(data) {
         name: self.getPodcastI18nString('CONFIRM'),
         class: 'btn btn-info',
         emit:'callMethod',
-        payload:{'endpoint':'music_service/podcast','method':'deletePodcastConfirm','data':id}
+        payload:{'endpoint':'music_service/podcast','method':'deletePodcastConfirm','data': [id, title]}
       }
     ]
   };
   self.commandRouter.broadcastMessage("openModal", modalData);
 };
 
-ControllerPodcast.prototype.deletePodcastConfirm = function(id) {
+ControllerPodcast.prototype.deletePodcastConfirm = function(data) {
   var self=this;
 
   self.podcasts.items = _.remove(self.podcasts.items, function(item) {
-    return item.id !== id;
+    return item.id !== data.id;
   });
 
   self.updateUIConfig();
+  var message = self.getPodcastI18nString('DELETE_PODCAST_COMPLETION');
+  message = message.replace('{0}', data.title);
   self.commandRouter.pushToastMessage(
       'info',
       self.getPodcastI18nString('PLUGIN_NAME'),
-      self.getPodcastI18nString('DELETE_PODCAST_COMPLETION')
+      message
   );
 };
 

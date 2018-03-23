@@ -8,8 +8,8 @@
   "CLOSE": "Close",
   "CANCEL": "Cancel",
   "CONFIRM": "Confirm",
-  "ADD_PODCAST_COMPLETION": "podcast item is added.",
-  "DELETE_PODCAST_COMPLETION": "podcast item is removed.",
+  "ADD_PODCAST_COMPLETION": "{0} podcast item is added.",
+  "DELETE_PODCAST_COMPLETION": "{0} podcast item is removed.",
   "DELETE_CONFIRM_MESSAGE": "Do you want to delete {0} podcast?",
   "CONFIG": {
     "TITLE": "Podcast Configuration",
@@ -18,7 +18,7 @@
     "DELETE_PODCAST": "delete podcast",
     "REGISTER_PODCAST": "register podcast",
     "ADD_PODCAST": "add podcast",
-    "ADD_PODCAST_NOTE": "http(s) podcast RSS feed url",
+    "ADD_PODCAST_NOTE": "Note: http(s) podcast RSS feed url",
     "DELETE_PODCAST_DESCRIPTION": "Select podcast to delete from podcasts",
     "ADD_PODCAST_DESCRIPTION": "Type podcast RSS feed link url"
   }

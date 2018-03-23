@@ -18,7 +18,7 @@
     "DELETE_PODCAST": "팟캐스트 삭제",
     "REGISTER_PODCAST": "팟캐스트 등록",
     "ADD_PODCAST": "팟캐스트 추가",
-    "ADD_PODCAST_NOTE": "http(s) RSS 팟캐스트 주소",
+    "ADD_PODCAST_NOTE": "참고: http(s) RSS 팟캐스트 주소 입력",
     "DELETE_PODCAST_DESCRIPTION": "팟캐스트 리스트에서 삭제할 팟캐스트 항목을 선택하세요.",
     "ADD_PODCAST_DESCRIPTION": "추가할 팟캐스트 RSS 연결 url을 입력하여 주세요."
   }
