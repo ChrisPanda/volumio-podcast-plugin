@@ -105,6 +105,35 @@ ControllerPodcast.prototype.getUIConfig = function() {
   return defer.promise;
 };
 
+ControllerPodcast.prototype.updateUIConfig = function() {
+  var self=this;
+
+  var lang_code = self.commandRouter.sharedVars.get('language_code');
+  self.commandRouter.i18nJson(__dirname+'/i18n/strings_' + lang_code + '.json',
+      __dirname + '/i18n/strings_en.json',
+      __dirname + '/UIConfig.json')
+  .then(function(uiconf)
+  {
+    self.podcasts.items.forEach(function (entry) {
+      self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
+        label: entry.title,
+        value: entry.id
+      });
+    });
+    self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value', {
+      value: self.podcasts.items[0].title,
+      label: self.podcasts.items[0].title
+    });
+    self.commandRouter.broadcastMessage('pushUiConfig', uiconf);
+
+    fs.writeJsonSync(__dirname+'/podcasts_list.json', self.podcasts);
+  })
+  .fail(function()
+  {
+    new Error();
+  });
+};
+
 ControllerPodcast.prototype.setUIConfig = function(data)
 {
   var self = this;
@@ -158,12 +187,12 @@ ControllerPodcast.prototype.addPodcast = function(data) {
       //self.logger.info("ControllerPodcast::PODCAST:IMAGE:"+self.podcastImage);
 
       self.podcasts.items.push(podcastItem);
-      self.updatePodcastUrls();
+      self.updateUIConfig();
 
       self.commandRouter.pushToastMessage(
           'info',
           self.getPodcastI18nString('PLUGIN_NAME'),
-          self.getPodcastI18nString('PODCAST_ADD_COMPLETION')
+          self.getPodcastI18nString('ADD_PODCAST_COMPLETION')
       );
   });
 
@@ -208,40 +237,12 @@ ControllerPodcast.prototype.deletePodcastConfirm = function(id) {
   });
   //self.logger.info("ControllerPodcast::DELETE:"+JSON.stringify(self.podcasts.items));
 
-  self.updatePodcastUrls();
+  self.updateUIConfig();
   self.commandRouter.pushToastMessage(
       'info',
       self.getPodcastI18nString('PLUGIN_NAME'),
-      self.getPodcastI18nString('PODCAST_DELETE_COMPLETION')
+      self.getPodcastI18nString('DELETE_PODCAST_COMPLETION')
   );
-};
-
-ControllerPodcast.prototype.updatePodcastUrls = function() {
-  var self=this;
-
-  var lang_code = self.commandRouter.sharedVars.get('language_code');
-  self.commandRouter.i18nJson(__dirname+'/i18n/strings_' + lang_code + '.json',
-      __dirname + '/i18n/strings_en.json',
-      __dirname + '/UIConfig.json')
-  .then(function(uiconf)
-  {
-    self.podcasts.items.forEach(function (entry) {
-      self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
-        label: entry.title,
-        value: entry.id
-      });
-    });
-    self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value', {
-      value: self.podcasts.items[0].title,
-      label: self.podcasts.items[0].title
-    });
-    self.commandRouter.broadcastMessage('pushUiConfig', uiconf);
-    fs.writeJsonSync(__dirname+'/podcasts_list.json', self.podcasts);
-  })
-  .fail(function()
-  {
-    new Error();
-  });
 };
 
 ControllerPodcast.prototype.showDialogMessage = function(message) {
@@ -417,10 +418,27 @@ ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
         self.getPodcastI18nString('PLUGIN_NAME'),
         self.getPodcastI18nString('WAIT_PODCAST_CHANNEL'));
 
+      self.mpdPlugin.clientMpd.on('system', function (status) {
+        var timeStart = Date.now();
+        self.logger.info('PODCAST:STATUS:UPDATE: ' + status);
+        self.mpdPlugin.getState().then(function (state) {
+          state.trackType = "podcast";
+          return self.commandRouter.stateMachine.syncState(state, self.serviceName);
+        });
+      });
+
       return self.mpdPlugin.sendMpdCommand('play', []).then(function () {
-          self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
-          return libQ.resolve();
-      })
+        return self.mpdPlugin.getState().then(function (state) {
+          var parsedState = this.mpdPlugin.parseState(state);
+          state.trackType = "podcast";
+          self.logger.info("ControllerPodcast:STATE:" + JSON.stringify(state));
+          self.logger.info("ControllerPodcast:PARSE_STATE:" + JSON.stringify(parsedState));
+          return self.commandRouter.stateMachine.syncState(state, self.serviceName);
+        });
+      });
+
+      //self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
+      //return self.mpdPlugin.sendMpdCommand('play', []);
     })
     .fail(function (e) {
       return defer.reject(new Error());

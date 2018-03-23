@@ -8,17 +8,17 @@
   "CLOSE": "Close",
   "CANCEL": "Cancel",
   "CONFIRM": "Confirm",
+  "ADD_PODCAST_COMPLETION": "Podcast item is added.",
+  "DELETE_PODCAST_COMPLETION": "Podcast item is removed.",
   "DELETE_CONFIRM_MESSAGE": "Do you want to delete {0} podcast?",
-  "PODCAST_ADD_COMPLETION": "Podcast item is added.",
-  "PODCAST_DELETE_COMPLETION": "Podcast item is removed.",
   "CONFIG": {
     "TITLE": "Podcast Configuration",
     "PODCAST": "Podcast",
-    "LIST_PODCAST": "podcast list",
+    "LIST_PODCAST": "podcasts",
     "DELETE_PODCAST": "delete podcast",
+    "REGISTER_PODCAST": "register podcast",
     "ADD_PODCAST": "add podcast",
     "ADD_PODCAST_NOTE": "input podcast RSS feed link url",
-    "REGISTER_PODCAST": "register podcast",
     "DELETE_PODCAST_DESCRIPTION": "You should select podcast to delete item from podcasts list",
     "ADD_PODCAST_DESCRIPTION": "You should input podcast RSS link url to add.(Example: TED Radio Hour Podcast's RSS link url - https://www.npr.org/rss/podcast.php?id=510298)"
   }
