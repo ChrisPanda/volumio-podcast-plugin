@@ -143,7 +143,6 @@ ControllerPodcast.prototype.setUIConfig = function(data)
   return libQ.resolve();
 };
 
-
 // Podcast Methods -----------------------------------------------------
 ControllerPodcast.prototype.addPodcast = function(data) {
   var self=this;
@@ -155,7 +154,6 @@ ControllerPodcast.prototype.addPodcast = function(data) {
     return;
   }
 
-  self.logger.info("ControllerPodcast::addPodcast:" + rssUrl);
   var rssParser = new RssParser({
     customFields: {
       channel: ['image']
@@ -184,7 +182,6 @@ ControllerPodcast.prototype.addPodcast = function(data) {
         url: rssUrl,
         image: podcastImage
       };
-      //self.logger.info("ControllerPodcast::PODCAST:IMAGE:"+self.podcastImage);
 
       self.podcasts.items.push(podcastItem);
       self.updateUIConfig();
@@ -203,7 +200,6 @@ ControllerPodcast.prototype.deletePodcast = function(data) {
   var self = this;
   var id = data['list_podcast'].value;
   var title = data['list_podcast'].label;
-  self.logger.info("ControllerPodcast::deletePodcast:ID:" + id);
 
   var message = self.getPodcastI18nString('DELETE_CONFIRM_MESSAGE');
   message = message.replace('{0}', title);
@@ -231,11 +227,9 @@ ControllerPodcast.prototype.deletePodcast = function(data) {
 ControllerPodcast.prototype.deletePodcastConfirm = function(id) {
   var self=this;
 
-  //self.logger.info("ControllerPodcast::DELETE_CONFIRM:"+id);
   self.podcasts.items = _.remove(self.podcasts.items, function(item) {
     return item.id !== id;
   });
-  //self.logger.info("ControllerPodcast::DELETE:"+JSON.stringify(self.podcasts.items));
 
   self.updateUIConfig();
   self.commandRouter.pushToastMessage(
@@ -279,8 +273,6 @@ ControllerPodcast.prototype.handleBrowseUri = function (curUri) {
   var self = this;
   var defer = libQ.defer();
 
-  self.logger.info("ControllerPodcast::handleBrowseUri:"+curUri);
-
   if (curUri.startsWith('podcast')) {
     if (curUri === 'podcast') {
       defer.resolve(self.getRootContent());
@@ -302,9 +294,9 @@ ControllerPodcast.prototype.getRootContent = function() {
     navigation: {
       lists: [
         {
-          availableListViews: [
-            "list", "grid"
-          ],
+          title: self.getPodcastI18nString('PLUGIN_NAME'),
+          icon: 'fa fa-podcast',
+          availableListViews: ["list", "grid"],
           items: []
         }
       ],
@@ -314,7 +306,6 @@ ControllerPodcast.prototype.getRootContent = function() {
     }
   };
 
-  response.navigation.lists[0].title = self.getPodcastI18nString('PLUGIN_NAME');
   self.podcasts.items.forEach(function (entry, index) {
     var podcast = {
       service: self.serviceName,
@@ -337,6 +328,7 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
     "navigation": {
       "lists": [
         {
+          icon: 'fa fa-podcast',
           "availableListViews": [
             "list", "grid"
           ],
@@ -420,10 +412,9 @@ ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
         self.getPodcastI18nString('WAIT_PODCAST_CHANNEL'));
 
       self.mpdPlugin.clientMpd.on('system', function (status) {
-        self.logger.info('ControllerPodcast:MPD_UPDATE: ' + status);
+        //self.logger.info('ControllerPodcast:MPD_UPDATE: ' + status);
         self.mpdPlugin.getState().then(function (state) {
-          //state.trackType = "podcast";
-          self.logger.info('ControllerPodcast:SYS_STATE: ' + JSON.stringify(state));
+          //self.logger.info('ControllerPodcast:SYS_STATE: ' + JSON.stringify(state));
           return self.commandRouter.stateMachine.syncState(state, self.serviceName);
         });
       });
@@ -431,7 +422,6 @@ ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
       return self.mpdPlugin.sendMpdCommand('play', []).then(function () {
         return self.mpdPlugin.getState().then(function (state) {
           var parsedState = this.mpdPlugin.parseState(state);
-          //state.trackType = "podcast";
           //self.logger.info("ControllerPodcast:IN_STATE:" + JSON.stringify(state));
           //self.logger.info("ControllerPodcast:PARSE_STATE:" + JSON.stringify(parsedState));
           return self.commandRouter.stateMachine.syncState(state, self.serviceName);

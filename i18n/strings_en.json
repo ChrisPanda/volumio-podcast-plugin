@@ -3,13 +3,13 @@
   "WAIT_PODCAST_CHANNEL":"Please wait for podcast channel",
   "WAIT_PODCAST_ITEMS": "Please wait for {0} podcast items",
   "STOP_PODCAST": "Stopped podcast channel",
-  "PODCAST_URL_PROBLEM": "illegal podcast url",
+  "PODCAST_URL_PROBLEM": "illegal podcast RSS link url",
   "PODCAST_URL_PARSING_PROBLEM": "error in parsing podcast RSS link url",
   "CLOSE": "Close",
   "CANCEL": "Cancel",
   "CONFIRM": "Confirm",
-  "ADD_PODCAST_COMPLETION": "Podcast item is added.",
-  "DELETE_PODCAST_COMPLETION": "Podcast item is removed.",
+  "ADD_PODCAST_COMPLETION": "podcast item is added.",
+  "DELETE_PODCAST_COMPLETION": "podcast item is removed.",
   "DELETE_CONFIRM_MESSAGE": "Do you want to delete {0} podcast?",
   "CONFIG": {
     "TITLE": "Podcast Configuration",
@@ -18,8 +18,8 @@
     "DELETE_PODCAST": "delete podcast",
     "REGISTER_PODCAST": "register podcast",
     "ADD_PODCAST": "add podcast",
-    "ADD_PODCAST_NOTE": "input podcast RSS feed link url",
-    "DELETE_PODCAST_DESCRIPTION": "You should select podcast to delete item from podcasts list",
-    "ADD_PODCAST_DESCRIPTION": "You should input podcast RSS link url to add.(Example: TED Radio Hour Podcast's RSS link url - https://www.npr.org/rss/podcast.php?id=510298)"
+    "ADD_PODCAST_NOTE": "http(s) podcast RSS feed url",
+    "DELETE_PODCAST_DESCRIPTION": "Select podcast to delete from podcasts",
+    "ADD_PODCAST_DESCRIPTION": "Type podcast RSS feed link url"
   }
 }
