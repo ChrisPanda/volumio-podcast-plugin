@@ -373,7 +373,7 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
           type: 'song',
           title: entry.title,
           icon: 'fa fa-podcast',
-          uri: 'podcast/' + uris[1] + '/' + entry.enclosure.url
+          uri: 'podcast/' + uris[1] + '/' + entry.enclosure.url + '|' + entry.title
         };
         response.navigation.lists[0].items.push(podcastItem);
       });
@@ -389,12 +389,13 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
   var uris = uri.split("/", 2);
   var response;
 
+  var uriInfo = uri.match(/podcast\/[0-9]+\/(.*)\|(.*)/);
   response = {
     service: self.serviceName,
     type: 'track',
-    uri: uri.match(/podcast\/.\/(.*)/)[1],
+    uri: uriInfo[1],
     trackType: self.getPodcastI18nString('PLUGIN_NAME'),
-    name: self.podcasts.items[uris[1]].title,
+    name: uriInfo[2],
     albumart: self.podcasts.items[uris[1]].image
   };
   defer.resolve(response);
@@ -431,8 +432,8 @@ ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
         return self.mpdPlugin.getState().then(function (state) {
           var parsedState = this.mpdPlugin.parseState(state);
           //state.trackType = "podcast";
-          self.logger.info("ControllerPodcast:IN_STATE:" + JSON.stringify(state));
-          self.logger.info("ControllerPodcast:PARSE_STATE:" + JSON.stringify(parsedState));
+          //self.logger.info("ControllerPodcast:IN_STATE:" + JSON.stringify(state));
+          //self.logger.info("ControllerPodcast:PARSE_STATE:" + JSON.stringify(parsedState));
           return self.commandRouter.stateMachine.syncState(state, self.serviceName);
         });
       });
