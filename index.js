@@ -187,13 +187,13 @@ ControllerPodcast.prototype.deletePodcast = function(data) {
     buttons: [
       {
         name: self.getPodcastI18nString('CANCEL'),
-        class: 'btn btn-info'
+        class: 'btn btn-cancel'
       },
       {
         name: self.getPodcastI18nString('CONFIRM'),
         class: 'btn btn-info',
-        emit: 'deletePodcastConfirm',
-        payload: id
+        emit:'callMethod',
+        payload:{'endpoint':'music_service/podcast','method':'deletePodcastConfirm','data':id}
       }
     ]
   };
@@ -203,6 +203,7 @@ ControllerPodcast.prototype.deletePodcast = function(data) {
 ControllerPodcast.prototype.deletePodcastConfirm = function(id) {
   var self=this;
 
+  self.logger.info("ControllerPodcast::DELETE_CONFIRM:"+id);
   self.podcasts.items = _.remove(self.podcasts.items, function(item) {
     return item.id !== id;
   });
