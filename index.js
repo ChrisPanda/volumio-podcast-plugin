@@ -154,7 +154,7 @@ ControllerPodcast.prototype.addPodcast = function(data) {
   }
 
   var rssParser = new RssParser({
-    customFields: {
+    feed: {
       channel: ['image']
     }
   });
@@ -420,11 +420,9 @@ ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
         self.getPodcastI18nString('WAIT_PODCAST_CHANNEL'));
 
       self.mpdPlugin.clientMpd.on('system', function (status) {
-        if (status != 'playlist' && status != undefined) {
-          self.logger.info('ControllerPodcast:MPD_UPDATE: ' + status);
+        if (status !== 'playlist' && status !== undefined) {
           self.mpdPlugin.getState().then(function (state) {
             if (state.status === 'play') {
-              self.logger.info('ControllerPodcast:SYS_STATE: ' + JSON.stringify(state));
               return self.commandRouter.stateMachine.syncState(state,
                   self.serviceName);
             }
@@ -434,13 +432,10 @@ ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
 
       return self.mpdPlugin.sendMpdCommand('play', []).then(function () {
         return self.mpdPlugin.getState().then(function (state) {
-          var parsedState = this.mpdPlugin.parseState(state);
           return self.commandRouter.stateMachine.syncState(state, self.serviceName);
         });
       });
 
-      //self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
-      //return self.mpdPlugin.sendMpdCommand('play', []);
     })
     .fail(function (e) {
       return defer.reject(new Error());
@@ -462,7 +457,6 @@ ControllerPodcast.prototype.stop = function() {
       self.getPodcastI18nString('STOP_PODCAST')
   );
 
-  //return self.mpdPlugin.sendMpdCommand('stop', []);
   return self.mpdPlugin.stop().then(function () {
     return self.mpdPlugin.getState().then(function (state) {
       return self.commandRouter.stateMachine.syncState(state, self.serviceName);
@@ -473,8 +467,6 @@ ControllerPodcast.prototype.stop = function() {
 ControllerPodcast.prototype.pause = function() {
   var self = this;
 
-  //self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
-  //return self.mpdPlugin.sendMpdCommand('pause', []);
   return self.mpdPlugin.pause().then(function () {
     return self.mpdPlugin.getState().then(function (state) {
       return self.commandRouter.stateMachine.syncState(state, self.serviceName);
@@ -485,8 +477,6 @@ ControllerPodcast.prototype.pause = function() {
 ControllerPodcast.prototype.resume = function() {
   var self = this;
 
-  //self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
-  //return self.mpdPlugin.sendMpdCommand('play', []);
   return self.mpdPlugin.resume().then(function () {
     return self.mpdPlugin.getState().then(function (state) {
       return self.commandRouter.stateMachine.syncState(state, self.serviceName);
