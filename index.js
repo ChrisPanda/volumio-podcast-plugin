@@ -43,7 +43,7 @@ ControllerPodcast.prototype.onStart = function() {
   self.loadPodcastsResource();
   self.addToBrowseSources();
 
-  self.serviceName = self.getPodcastI18nString('PLUGIN_NAME');
+  self.serviceName = "podcast";
 
   return libQ.resolve();
 };
@@ -420,9 +420,16 @@ ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
         self.getPodcastI18nString('WAIT_PODCAST_CHANNEL'));
 
       self.mpdPlugin.clientMpd.on('system', function (status) {
-        self.mpdPlugin.getState().then(function (state) {
-          return self.commandRouter.stateMachine.syncState(state, self.serviceName);
-        });
+        if (status != 'playlist' && status != undefined) {
+          self.logger.info('ControllerPodcast:MPD_UPDATE: ' + status);
+          self.mpdPlugin.getState().then(function (state) {
+            if (state.status === 'play') {
+              self.logger.info('ControllerPodcast:SYS_STATE: ' + JSON.stringify(state));
+              return self.commandRouter.stateMachine.syncState(state,
+                  self.serviceName);
+            }
+          });
+        }
       });
 
       return self.mpdPlugin.sendMpdCommand('play', []).then(function () {

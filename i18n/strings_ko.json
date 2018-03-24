@@ -8,8 +8,8 @@
   "CLOSE": "닫기",
   "CANCEL": "취소",
   "CONFIRM": "확인",
-  "ADD_PODCAST_COMPLETION": "팟캐스트 항목이 추가되엇습니다.",
-  "DELETE_PODCAST_COMPLETION": "팟캐스트 항목이 삭제되엇습니다.",
+  "ADD_PODCAST_COMPLETION": "{0} 팟캐스트 항목이 추가되엇습니다.",
+  "DELETE_PODCAST_COMPLETION": "{0} 팟캐스트 항목이 삭제되엇습니다.",
   "DELETE_CONFIRM_MESSAGE": "{0} 팟캐스트를 삭제 하시겠습니까?",
   "CONFIG": {
     "TITLE": "팟캐스트 설정",
