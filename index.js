@@ -154,12 +154,10 @@ ControllerPodcast.prototype.addPodcast = function(data) {
     return;
   }
 
-  message = self.getPodcastI18nString('ADD_PODCAST_PROCESSING');
-  message = message.replace('{0}', feed.title);
   self.commandRouter.pushToastMessage(
       'info',
       self.getPodcastI18nString('PLUGIN_NAME'),
-      message
+      self.getPodcastI18nString('ADD_PODCAST_PROCESSING')
   );
 
   var rssParser = new RssParser({
