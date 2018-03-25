@@ -147,11 +147,20 @@ ControllerPodcast.prototype.addPodcast = function(data) {
   var self=this;
   var defer = libQ.defer();
   var rssUrl = data['input_podcast'];
+  var message;
 
   if ((rssUrl === null) || (rssUrl.length === 0)) {
     self.showDialogMessage(self.getPodcastI18nString('PODCAST_URL_PROBLEM'));
     return;
   }
+
+  message = self.getPodcastI18nString('ADD_PODCAST_PROCESSING');
+  message = message.replace('{0}', feed.title);
+  self.commandRouter.pushToastMessage(
+      'info',
+      self.getPodcastI18nString('PLUGIN_NAME'),
+      message
+  );
 
   var rssParser = new RssParser({
     feed: {
@@ -185,7 +194,7 @@ ControllerPodcast.prototype.addPodcast = function(data) {
       self.podcasts.items.push(podcastItem);
       self.updateUIConfig();
 
-      var message = self.getPodcastI18nString('ADD_PODCAST_COMPLETION');
+      message = self.getPodcastI18nString('ADD_PODCAST_COMPLETION');
       message = message.replace('{0}', feed.title);
       self.commandRouter.pushToastMessage(
           'info',
