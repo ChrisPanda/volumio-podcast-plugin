@@ -161,6 +161,10 @@ ControllerPodcast.prototype.addPodcast = function(data) {
   );
 
   var rssParser = new RssParser({
+    headers: {
+      'Accept': '*/*',
+      'User-Agent': 'Mozilla/5.0'
+    },
     feed: {
       channel: ['image']
     }
@@ -366,7 +370,11 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
   );
 
   var rssParser = new RssParser({
-    customFields: {
+    headers: {
+      'Accept': '*/*',
+      'User-Agent': 'Mozilla/5.0'
+    },
+    feed: {
       channel: ['image']
     }
   });
