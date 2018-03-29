@@ -184,8 +184,6 @@ ControllerPodcast.prototype.addPodcast = function(data) {
         imageUrl = feed.image.url;
       else if ( (feed.itunes !== undefined)  && (feed.itunes.image !== undefined) )
         imageUrl = feed.itunes.image;
-      else
-        imageUrl = '';
 
       podcastItem = {
         id: Math.random().toString(36).substring(2, 10) +
