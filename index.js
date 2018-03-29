@@ -172,25 +172,44 @@ ControllerPodcast.prototype.addPodcast = function(data) {
 
   rssParser.parseURL(rssUrl,
     function (err, feed) {
-      var podcastImage, podcastItem;
+      var imageUrl, podcastItem;
+      const defaultImage = '/albumart?sourceicon=music_service/podcast/default.jpg';
 
       if (err) {
-        self.showDialogMessage(self.getPodcastI18nString('PODCAST_URL_PARSING_PROBLEM'));
+        self.showDialogMessage(
+            self.getPodcastI18nString('PODCAST_URL_PARSING_PROBLEM'));
         return;
       }
 
-      podcastImage = "";
-      if (feed.itunes !== undefined)
-        podcastImage = feed.itunes.image;
-      if (feed.image !== undefined)
-        podcastImage = feed.image.url;
+      // check podcast main albumart
+      if (feed.image !== undefined) {
+        imageUrl = feed.image.url;
+        if (imageUrl === undefined) {
+          if (feed.itunes !== undefined) {
+            imageUrl = feed.itunes.image;
+            if (imageUrl === undefined) {
+              imageUrl = defaultImage;
+            }
+          }
+          else
+            imageUrl = defaultImage;
+        }
+      }
+      else if (feed.itunes !== undefined) {
+        imageUrl = feed.itunes.image;
+        if (imageUrl === undefined) {
+          imageUrl = defaultImage;
+        }
+      }
+      else
+        imageUrl = defaultImage;
 
       podcastItem = {
         id: Math.random().toString(36).substring(2, 10) +
             Math.random().toString(36).substring(2, 10),
         title: feed.title,
         url: rssUrl,
-        image: podcastImage
+        image: imageUrl
       };
 
       self.podcasts.items.push(podcastItem);
