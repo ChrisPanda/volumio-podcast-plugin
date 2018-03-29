@@ -173,7 +173,6 @@ ControllerPodcast.prototype.addPodcast = function(data) {
   rssParser.parseURL(rssUrl,
     function (err, feed) {
       var imageUrl, podcastItem;
-      const defaultImage = '/albumart?sourceicon=music_service/podcast/default.jpg';
 
       if (err) {
         self.showDialogMessage(
@@ -181,28 +180,12 @@ ControllerPodcast.prototype.addPodcast = function(data) {
         return;
       }
 
-      // check podcast main albumart
-      if (feed.image !== undefined) {
+      if ( (feed.image !== undefined) && (feed.image.url !== undefined) )
         imageUrl = feed.image.url;
-        if (imageUrl === undefined) {
-          if (feed.itunes !== undefined) {
-            imageUrl = feed.itunes.image;
-            if (imageUrl === undefined) {
-              imageUrl = defaultImage;
-            }
-          }
-          else
-            imageUrl = defaultImage;
-        }
-      }
-      else if (feed.itunes !== undefined) {
+      else if ( (feed.itunes !== undefined)  && (feed.itunes.image !== undefined) )
         imageUrl = feed.itunes.image;
-        if (imageUrl === undefined) {
-          imageUrl = defaultImage;
-        }
-      }
       else
-        imageUrl = defaultImage;
+        imageUrl = '';
 
       podcastItem = {
         id: Math.random().toString(36).substring(2, 10) +
@@ -345,12 +328,17 @@ ControllerPodcast.prototype.getRootContent = function() {
   };
 
   self.podcasts.items.forEach(function (entry, index) {
+    var imageUrl;
+
+    imageUrl = entry.image;
+    if (imageUrl === undefined)
+      imageUrl = '/albumart?sourceicon=music_service/podcast/default.jpg';
     var podcast = {
       service: self.serviceName,
       type: 'folder',
       title: entry.title,
       uri: 'podcast/' + index,
-      albumart: entry.image
+      albumart: imageUrl
     };
     response.navigation.lists[0].items.push(podcast);
   });
