@@ -154,12 +154,12 @@ ControllerPodcast.prototype.addPodcast = function(data) {
     return;
   }
 
-  var findItem = _.find(self.podcasts, function(item) {
-    item.url === rssUrl
+  var findItem = _.find(self.podcasts.items, function(item) {
+    return item.url === rssUrl;
   });
   if (findItem !== undefined) {
     self.commandRouter.pushToastMessage(
-        'alert',
+        'info',
         self.getPodcastI18nString('PLUGIN_NAME'),
         self.getPodcastI18nString('DUPLICATED_PODCAST')
     );
