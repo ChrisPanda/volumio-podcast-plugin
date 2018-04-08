@@ -486,8 +486,8 @@ ControllerPodcast.prototype.getState = function () {
     // If there is a track listed as currently playing, get the track info
     if (collectedState.position !== null) {
       self.commandRouter.pushConsoleMessage('ControllerPodcast::PODCAST_POSITION1:'+collectedState.position);
-      self.logger.info("ControllerPodcast:PODCAST_POSITION2:"+self.commandRouter.stateMachine.currentPosition);
-      var trackinfo=self.commandRouter.stateMachine.getTrack(collectedState.position);
+      self.logger.info("ControllerPodcast:PODCAST_POSITION2:"+self.stateMachine.currentPosition);
+      var trackinfo=self.stateMachine.getTrack(self.stateMachine.currentPosition);
       self.commandRouter.pushConsoleMessage('ControllerPodcast::PODCAST_TRACKINFO:'+JSON.stringify(trackinfo));
       //var trackinfo = self.mpdPlugin.parseTrackInfo(objTrackInfo);
       collectedState.isStreaming = trackinfo.isStreaming != undefined ? trackinfo.isStreaming : false;
