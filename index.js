@@ -428,7 +428,8 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
     uri: uriInfo[1],
     trackType: self.getPodcastI18nString('PLUGIN_NAME'),
     name: uriInfo[2],
-    albumart: self.podcasts.items[uris[1]].image
+    albumart: self.podcasts.items[uris[1]].image,
+    serviceName: self.serviceName
   };
   defer.resolve(response);
 
@@ -478,25 +479,26 @@ ControllerPodcast.prototype.getState = function () {
 
   self.commandRouter.pushConsoleMessage('ControllerPodcast::getState');
 
-  return self.sendMpdCommand('status', [])
+  return self.mpdPlugin.sendMpdCommand('status', [])
   .then(function (objState) {
     var collectedState = self.mpdPlugin.parseState(objState);
 
     // If there is a track listed as currently playing, get the track info
     if (collectedState.position !== null) {
-      return self.sendMpdCommand('playlistinfo', [collectedState.position])
-      .then(function (objTrackInfo) {
-        var trackinfo = self.parseTrackInfo(objTrackInfo);
-        collectedState.isStreaming = trackinfo.isStreaming != undefined ? trackinfo.isStreaming : false;
-        collectedState.title = trackinfo.title;
-        collectedState.artist = trackinfo.artist;
-        collectedState.album = trackinfo.album;
-        collectedState.uri = trackinfo.uri;
-        collectedState.trackType = trackinfo.trackType.split('?')[0];
-        collectedState.serviceName = trackinfo.serviceName;
-        self.commandRouter.pushConsoleMessage('ControllerPodcast::PODTCAST_STATE:'+JSON.stringify(collectedState));
-        return collectedState;
-      });
+      self.commandRouter.pushConsoleMessage('ControllerPodcast::PODCAST_POSITION1:'+collectedState.position);
+      self.logger.info("ControllerPodcast:PODCAST_POSITION2:"+self.commandRouter.stateMachine.currentPosition);
+      var trackinfo=self.commandRouter.stateMachine.getTrack(collectedState.position);
+      self.commandRouter.pushConsoleMessage('ControllerPodcast::PODCAST_TRACKINFO:'+JSON.stringify(trackinfo));
+      //var trackinfo = self.mpdPlugin.parseTrackInfo(objTrackInfo);
+      collectedState.isStreaming = trackinfo.isStreaming != undefined ? trackinfo.isStreaming : false;
+      collectedState.title = trackinfo.title;
+      collectedState.artist = trackinfo.artist;
+      collectedState.album = trackinfo.album;
+      collectedState.uri = trackinfo.uri;
+      collectedState.trackType = trackinfo.trackType.split('?')[0];
+      collectedState.serviceName = trackinfo.serviceName;
+      self.commandRouter.pushConsoleMessage('ControllerPodcast::PODTCAST_STATE:'+JSON.stringify(collectedState));
+      return collectedState;
     } else {
       collectedState.isStreaming = false;
       collectedState.title = null;
