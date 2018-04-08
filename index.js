@@ -453,18 +453,17 @@ ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
 
       self.mpdPlugin.clientMpd.on('system', function (status) {
         if (status !== 'playlist' && status !== undefined) {
-          self.mpdPlugin.getState().then(function (state) {
+          self.getState().then(function (state) {
             if (state.status === 'play') {
-              return self.commandRouter.stateMachine.syncState(state,
-                  self.serviceName);
+              return self.pushState(state);
             }
           });
         }
       });
 
       return self.mpdPlugin.sendMpdCommand('play', []).then(function () {
-        return self.mpdPlugin.getState().then(function (state) {
-          return self.commandRouter.stateMachine.syncState(state, self.serviceName);
+        return self.getState().then(function (state) {
+          return self.pushState(state);
         });
       });
 
@@ -472,6 +471,47 @@ ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
     .fail(function (e) {
       return defer.reject(new Error());
     });
+};
+
+ControllerPodcast.prototype.getState = function () {
+  var self = this;
+
+  self.commandRouter.pushConsoleMessage('ControllerPodcast::getState');
+
+  return self.sendMpdCommand('status', [])
+  .then(function (objState) {
+    var collectedState = self.mpdPlugin.parseState(objState);
+
+    // If there is a track listed as currently playing, get the track info
+    if (collectedState.position !== null) {
+      return self.sendMpdCommand('playlistinfo', [collectedState.position])
+      .then(function (objTrackInfo) {
+        var trackinfo = self.parseTrackInfo(objTrackInfo);
+        collectedState.isStreaming = trackinfo.isStreaming != undefined ? trackinfo.isStreaming : false;
+        collectedState.title = trackinfo.title;
+        collectedState.artist = trackinfo.artist;
+        collectedState.album = trackinfo.album;
+        collectedState.uri = trackinfo.uri;
+        collectedState.trackType = trackinfo.trackType.split('?')[0];
+        collectedState.serviceName = trackinfo.serviceName;
+        self.commandRouter.pushConsoleMessage('ControllerPodcast::PODTCAST_STATE:'+JSON.stringify(collectedState));
+        return collectedState;
+      });
+    } else {
+      collectedState.isStreaming = false;
+      collectedState.title = null;
+      collectedState.artist = null;
+      collectedState.album = null;
+      collectedState.uri = null;
+      return collectedState;
+    }
+  });
+};
+
+ControllerPodcast.prototype.pushState = function (state) {
+  var self = this;
+
+  return self.commandRouter.servicePushState(state, self.serviceName);
 };
 
 ControllerPodcast.prototype.seek = function (position) {
@@ -490,8 +530,8 @@ ControllerPodcast.prototype.stop = function() {
   );
 
   return self.mpdPlugin.stop().then(function () {
-    return self.mpdPlugin.getState().then(function (state) {
-      return self.commandRouter.stateMachine.syncState(state, self.serviceName);
+    return self.getState().then(function (state) {
+      return self.pushState(state);
     });
   });
 };
@@ -500,8 +540,8 @@ ControllerPodcast.prototype.pause = function() {
   var self = this;
 
   return self.mpdPlugin.pause().then(function () {
-    return self.mpdPlugin.getState().then(function (state) {
-      return self.commandRouter.stateMachine.syncState(state, self.serviceName);
+    return self.getState().then(function (state) {
+      return self.pushState(state);
     });
   });
 };
@@ -510,8 +550,8 @@ ControllerPodcast.prototype.resume = function() {
   var self = this;
 
   return self.mpdPlugin.resume().then(function () {
-    return self.mpdPlugin.getState().then(function (state) {
-      return self.commandRouter.stateMachine.syncState(state, self.serviceName);
+    return self.getState().then(function (state) {
+      return self.pushState(state);
     });
   });
 };
