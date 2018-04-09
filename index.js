@@ -15,7 +15,7 @@ function ControllerPodcast(context) {
   self.commandRouter = this.context.coreCommand;
   self.logger = this.context.logger;
   self.configManager = this.context.configManager;
-  self.stateMachine = self.commandRouter.stateMachine;
+  //self.stateMachine = self.commandRouter.stateMachine;
 
   self.logger.info("ControllerPodcast::constructor");
 }
@@ -486,8 +486,10 @@ ControllerPodcast.prototype.getState = function () {
     // If there is a track listed as currently playing, get the track info
     if (collectedState.position !== null) {
       self.commandRouter.pushConsoleMessage('ControllerPodcast::PODCAST_POSITION1:'+collectedState.position);
-      self.logger.info("ControllerPodcast:PODCAST_POSITION2:"+self.stateMachine.currentPosition);
-      var trackinfo=self.stateMachine.getTrack(self.stateMachine.currentPosition);
+      self.logger.info("ControllerPodcast::PODCAST_POSITION2:"+self.commandRouter.stateMachine.currentPosition);
+
+      var trackinfo=self.commandRouter.stateMachine.getTrack(self.commandRouter.stateMachine.currentPosition);
+
       self.commandRouter.pushConsoleMessage('ControllerPodcast::PODCAST_TRACKINFO:'+JSON.stringify(trackinfo));
       //var trackinfo = self.mpdPlugin.parseTrackInfo(objTrackInfo);
       collectedState.isStreaming = trackinfo.isStreaming != undefined ? trackinfo.isStreaming : false;
@@ -513,7 +515,8 @@ ControllerPodcast.prototype.getState = function () {
 ControllerPodcast.prototype.pushState = function (state) {
   var self = this;
 
-  return self.commandRouter.servicePushState(state, self.serviceName);
+  if (state.serviceName === self.serviceName)
+    return self.commandRouter.servicePushState(state, self.serviceName);
 };
 
 ControllerPodcast.prototype.seek = function (position) {
