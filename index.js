@@ -15,7 +15,6 @@ function ControllerPodcast(context) {
   self.commandRouter = this.context.coreCommand;
   self.logger = this.context.logger;
   self.configManager = this.context.configManager;
-  //self.stateMachine = self.commandRouter.stateMachine;
 
   self.logger.info("ControllerPodcast::constructor");
 }
