@@ -477,21 +477,13 @@ ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
 ControllerPodcast.prototype.getState = function () {
   var self = this;
 
-  self.commandRouter.pushConsoleMessage('ControllerPodcast::getState');
-
   return self.mpdPlugin.sendMpdCommand('status', [])
   .then(function (objState) {
     var collectedState = self.mpdPlugin.parseState(objState);
 
     // If there is a track listed as currently playing, get the track info
     if (collectedState.position !== null) {
-      self.commandRouter.pushConsoleMessage('ControllerPodcast::PODCAST_POSITION1:'+collectedState.position);
-      self.logger.info("ControllerPodcast::PODCAST_POSITION2:"+self.commandRouter.stateMachine.currentPosition);
-
       var trackinfo=self.commandRouter.stateMachine.getTrack(self.commandRouter.stateMachine.currentPosition);
-
-      self.commandRouter.pushConsoleMessage('ControllerPodcast::PODCAST_TRACKINFO:'+JSON.stringify(trackinfo));
-      //var trackinfo = self.mpdPlugin.parseTrackInfo(objTrackInfo);
       collectedState.isStreaming = trackinfo.isStreaming != undefined ? trackinfo.isStreaming : false;
       collectedState.title = trackinfo.title;
       collectedState.artist = trackinfo.artist;
@@ -499,7 +491,6 @@ ControllerPodcast.prototype.getState = function () {
       collectedState.uri = trackinfo.uri;
       collectedState.trackType = trackinfo.trackType.split('?')[0];
       collectedState.serviceName = trackinfo.serviceName;
-      self.commandRouter.pushConsoleMessage('ControllerPodcast::PODTCAST_STATE:'+JSON.stringify(collectedState));
       return collectedState;
     } else {
       collectedState.isStreaming = false;
