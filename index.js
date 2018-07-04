@@ -309,7 +309,7 @@ ControllerPodcast.prototype.handleBrowseUri = function (curUri) {
     if (curUri === 'podcast') {
       response = self.getRootContent();
     }
-    else if (curUri === 'podcast/bbc') {
+    else if (curUri.startsWith('podcast/bbc')) {
       var uriParts = curUri.split('/');
 
       if (uriParts.length === 2)
@@ -605,8 +605,8 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(channel, uri) {
           }
         };
         response.navigation.lists[0].title = self.getPodcastI18nString('TITLE_' + channel.toUpperCase()) + '/' + feed.title;
-        self.podcastImage = feed.itunes.image;
-        //self.logger.info("Podcast:IMAGE:"+self.podcastImage);
+        self.bbcEpisodeImage = feed.itunes.image;
+        //self.logger.info("Podcast:IMAGE:"+self.bbcEpisodeImage);
 
         feed.items.forEach(function (entry, index) {
           var channel = {
@@ -641,7 +641,7 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
         trackType: self.getPodcastI18nString('PLUGIN_NAME'),
         name: uriInfo[2],
         album: uriInfo[3],
-        albumart: self.podcastImage
+        albumart: self.bbcEpisodeImage
       };
       break;
 
