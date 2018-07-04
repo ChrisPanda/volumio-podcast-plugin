@@ -1,6 +1,8 @@
 {
   "PLUGIN_NAME": "Podcast",
   "WAIT_PODCAST_ITEMS": "Please wait for {0} podcast items",
+  "WAIT_BBC_PODCAST_LIST": "Please wait BBC {0} radio podcast list",
+  "WAIT_BBC_PODCAST_ITEMS": "Please wait BBC radio podcast items",
   "STOP_PODCAST": "Stopped podcast channel",
   "PODCAST_URL_PROBLEM": "illegal podcast RSS link url",
   "PODCAST_URL_PARSING_PROBLEM": "error in parsing podcast RSS link url",

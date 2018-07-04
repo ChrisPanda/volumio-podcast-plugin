@@ -1,6 +1,8 @@
 {
   "PLUGIN_NAME": "팟캐스트",
   "WAIT_PODCAST_ITEMS": "{0} 팟캐스트 목록 조회중입니다.",
+  "WAIT_BBC_PODCAST_LIST": "BBC {0} 라디오 팟캐스트 목록 조회중입니다.",
+  "WAIT_BBC_PODCAST_ITEMS": "BBC 라디오 팟캐스트 아이템 조회중입니다.",
   "STOP_PODCAST": "팟캐스트 재생을 중지합니다.",
   "PODCAST_URL_PROBLEM": "팟캐스트 RSS url 오류",
   "PODCAST_URL_PARSING_PROBLEM": "팟캐스트 RSS 주소 본문 조회중 오류",
