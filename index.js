@@ -313,19 +313,15 @@ ControllerPodcast.prototype.handleBrowseUri = function (curUri) {
       var uriParts = curUri.split('/');
 
       if (uriParts.length === 2)
-        response =  self.getRootBbcContent();
+        response = self.getRootBbcContent();
       else if (uriParts.length === 3)
         response = self.getPodcastBBC(uriParts[2]);
       else if (uriParts.length === 4)
         response = self.getPodcastBBCEpisodes(uriParts[2], uriParts[3]);
     }
     else {
-      response =  self.getPodcastContent(curUri);
+      response = self.getPodcastContent(curUri);
     }
-
-    //else {
-    //return defer.reject(new Error());
-    //}
   }
 
   return response;
@@ -477,7 +473,7 @@ ControllerPodcast.prototype.getPodcastBBC = function(uri) {
   var defer = libQ.defer();
 
   var streamUrl = self.bbcPodcastRadio + uri;
-  self.logger.info("Podcast:"+ streamUrl);
+  //self.logger.info("Podcast:"+ streamUrl);
 
   var waitMessage = self.getPodcastI18nString('WAIT_BBC_PODCAST_LIST');
   waitMessage = waitMessage.replace('{0}', uri);
@@ -550,7 +546,7 @@ ControllerPodcast.prototype.getPodcastBBC = function(uri) {
           };
           response.navigation.lists[0].items.push(channel);
         }
-        self.logger.info("getPodcastBBC:"+ JSON.stringify(response));
+        //self.logger.info("getPodcastBBC:"+ JSON.stringify(response));
 
         defer.resolve(response);
       });
@@ -604,7 +600,8 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(channel, uri) {
             }
           }
         };
-        response.navigation.lists[0].title = self.getPodcastI18nString('TITLE_' + channel.toUpperCase()) + '/' + feed.title;
+        response.navigation.lists[0].title =
+            self.getPodcastI18nString('TITLE_' + channel.toUpperCase()) + '/' + feed.title;
         self.bbcEpisodeImage = feed.itunes.image;
         //self.logger.info("Podcast:IMAGE:"+self.bbcEpisodeImage);
 
@@ -618,7 +615,7 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(channel, uri) {
           };
           response.navigation.lists[0].items.push(channel);
         });
-        self.logger.info("getPodcastBBCEpisodes:"+ JSON.stringify(response));
+        //self.logger.info("getPodcastBBCEpisodes:"+ JSON.stringify(response));
         defer.resolve(response);
       });
 
@@ -723,6 +720,7 @@ ControllerPodcast.prototype.getState = function () {
       collectedState.artist = null;
       collectedState.album = null;
       collectedState.uri = null;
+      collectedState.serviceName = trackinfo.serviceName;
       return collectedState;
     }
   });
@@ -731,8 +729,10 @@ ControllerPodcast.prototype.getState = function () {
 ControllerPodcast.prototype.pushState = function (state) {
   var self = this;
 
-  if (state.serviceName === self.serviceName)
-    return self.commandRouter.servicePushState(state, self.serviceName);
+  self.logger.info("Podcast:pushState:"+ JSON.stringify(state));
+
+  //if (state.serviceName === self.serviceName)
+  return self.commandRouter.servicePushState(state, self.serviceName);
 };
 
 ControllerPodcast.prototype.seek = function (position) {
