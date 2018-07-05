@@ -416,13 +416,13 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
       response.navigation.lists[0].title = feed.title;
 
       self.currentEpisodes = [];
-      feed.items.forEach(function (entry) {
+      feed.items.forEach(function (entry, index) {
         var podcastItem = {
           service: self.serviceName,
           type: 'song',
           title: entry.title,
           icon: 'fa fa-podcast',
-          uri: 'podcast/' + uris[1],
+          uri: 'podcast/' + uris[1] + '/' + index
           //uri: 'podcast/' + uris[1] + '/' + entry.enclosure.url + '|' + entry.title
         };
         self.currentEpisodes.push({
@@ -620,7 +620,7 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(channel, uri) {
             type: 'song',
             title: entry.title,
             icon: 'fa fa-podcast',
-            uri: 'podcast/bbc/'+ index,
+            uri: 'podcast/bbc/'+ index
             //uri: 'podcast/bbc/'+ index + '/'+ entry.enclosureSecure.$.url + '|' + entry.title + '|' + feed.title
           };
           self.currentEpisodes.push({
@@ -666,7 +666,7 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
     default:
       //var uriInfo = uri.match(/podcast\/[0-9]+\/(.*)\|(.*)/);
 
-      var episode = self.currentEpisodes[uris[1]];
+      var episode = self.currentEpisodes[uris[2]];
       response = {
         service: self.serviceName,
         type: 'track',
