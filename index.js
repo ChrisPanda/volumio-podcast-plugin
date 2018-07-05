@@ -45,6 +45,7 @@ ControllerPodcast.prototype.onStart = function() {
   self.addToBrowseSources();
 
   self.serviceName = "podcast";
+  self.currentEpisodes = [];
 
   return libQ.resolve();
 };
@@ -147,7 +148,7 @@ ControllerPodcast.prototype.setUIConfig = function(data)
 ControllerPodcast.prototype.addPodcast = function(data) {
   var self=this;
   var defer = libQ.defer();
-  var rssUrl = data['input_podcast'];
+  var rssUrl = data['input_podcast'].trim();
   var message;
 
   if ((rssUrl === null) || (rssUrl.length === 0)) {
@@ -414,14 +415,20 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
     function (err, feed) {
       response.navigation.lists[0].title = feed.title;
 
+      self.currentEpisodes = [];
       feed.items.forEach(function (entry) {
         var podcastItem = {
           service: self.serviceName,
           type: 'song',
           title: entry.title,
           icon: 'fa fa-podcast',
-          uri: 'podcast/' + uris[1] + '/' + entry.enclosure.url + '|' + entry.title
+          uri: 'podcast/' + uris[1] + '/' + entry.enclosure.url
+          //uri: 'podcast/' + uris[1] + '/' + entry.enclosure.url + '|' + entry.title
         };
+        self.currentEpisodes.push({
+          index: index,
+          title: entry.title
+        });
         response.navigation.lists[0].items.push(podcastItem);
       });
       defer.resolve(response);
@@ -605,14 +612,21 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(channel, uri) {
         self.bbcEpisodeImage = feed.itunes.image;
         //self.logger.info("Podcast:IMAGE:"+self.bbcEpisodeImage);
 
+        self.currentEpisodes = [];
         feed.items.forEach(function (entry, index) {
           var channel = {
             service: self.serviceName,
             type: 'song',
             title: entry.title,
             icon: 'fa fa-podcast',
-            uri: 'podcast/bbc/'+ index + '/'+ entry.enclosureSecure.$.url + '|' + entry.title + '|' + feed.title
+            uri: 'podcast/bbc/'+ index + '/'+ entry.enclosureSecure.$.url
+            //uri: 'podcast/bbc/'+ index + '/'+ entry.enclosureSecure.$.url + '|' + entry.title + '|' + feed.title
           };
+          self.currentEpisodes.push({
+            index: index,
+            title: entry.title,
+            album: feed.title
+          });
           response.navigation.lists[0].items.push(channel);
         });
         //self.logger.info("getPodcastBBCEpisodes:"+ JSON.stringify(response));
@@ -625,31 +639,40 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(channel, uri) {
 ControllerPodcast.prototype.explodeUri = function (uri) {
   var self = this;
   var defer = libQ.defer();
-  var uris = uri.split("/", 2);
+  var uris = uri.split("/", 3);
   var response;
 
   switch (uris[1]) {
     case 'bbc':
-      var uriInfo = uri.match(/podcast\/bbc\/[0-9]+\/(.*)\|(.*)\|(.*)/);
+      //var uriInfo = uri.match(/podcast\/bbc\/[0-9]+\/(.*)\|(.*)\|(.*)/);
+
+      var episode = self.currentEpisodes[uris[2]];
       response = {
         service: self.serviceName,
         type: 'track',
-        uri: uriInfo[1],
+        uri: uris[3],
+        //uri: uriInfo[1],
         trackType: self.getPodcastI18nString('PLUGIN_NAME'),
-        name: uriInfo[2],
-        album: uriInfo[3],
+        //name: uriInfo[2],
+        //album: uriInfo[3],
+        name: episode.title,
+        album: episode.album,
         albumart: self.bbcEpisodeImage
       };
       break;
 
     default:
-      var uriInfo = uri.match(/podcast\/[0-9]+\/(.*)\|(.*)/);
+      //var uriInfo = uri.match(/podcast\/[0-9]+\/(.*)\|(.*)/);
+
+      var episode = self.currentEpisodes[uris[1]];
       response = {
         service: self.serviceName,
         type: 'track',
-        uri: uriInfo[1],
+        uri: uris[2],
+        //uri: uriInfo[1],
         trackType: self.getPodcastI18nString('PLUGIN_NAME'),
-        name: uriInfo[2],
+        //name: uriInfo[2],
+        name: episode.title,
         albumart: self.podcasts.items[uris[1]].image,
         serviceName: self.serviceName
       };
