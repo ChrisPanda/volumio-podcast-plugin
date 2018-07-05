@@ -422,11 +422,12 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
           type: 'song',
           title: entry.title,
           icon: 'fa fa-podcast',
-          uri: 'podcast/' + uris[1] + '/' + entry.enclosure.url
+          uri: 'podcast/' + uris[1],
           //uri: 'podcast/' + uris[1] + '/' + entry.enclosure.url + '|' + entry.title
         };
         self.currentEpisodes.push({
           index: index,
+          url: entry.enclosure.url,
           title: entry.title
         });
         response.navigation.lists[0].items.push(podcastItem);
@@ -619,11 +620,12 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(channel, uri) {
             type: 'song',
             title: entry.title,
             icon: 'fa fa-podcast',
-            uri: 'podcast/bbc/'+ index + '/'+ entry.enclosureSecure.$.url
+            uri: 'podcast/bbc/'+ index,
             //uri: 'podcast/bbc/'+ index + '/'+ entry.enclosureSecure.$.url + '|' + entry.title + '|' + feed.title
           };
           self.currentEpisodes.push({
             index: index,
+            url: entry.enclosureSecure.$.url,
             title: entry.title,
             album: feed.title
           });
@@ -650,8 +652,8 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
       response = {
         service: self.serviceName,
         type: 'track',
-        uri: uris[3],
         //uri: uriInfo[1],
+        uri: episode.url,
         trackType: self.getPodcastI18nString('PLUGIN_NAME'),
         //name: uriInfo[2],
         //album: uriInfo[3],
@@ -668,8 +670,8 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
       response = {
         service: self.serviceName,
         type: 'track',
-        uri: uris[2],
         //uri: uriInfo[1],
+        uri: episode.url,
         trackType: self.getPodcastI18nString('PLUGIN_NAME'),
         //name: uriInfo[2],
         name: episode.title,
