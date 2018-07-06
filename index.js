@@ -423,7 +423,6 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
           title: entry.title,
           icon: 'fa fa-podcast',
           uri: 'podcast/' + uris[1] + '/' + index
-          //uri: 'podcast/' + uris[1] + '/' + entry.enclosure.url + '|' + entry.title
         };
         self.currentEpisodes.push({
           index: index,
@@ -481,7 +480,6 @@ ControllerPodcast.prototype.getPodcastBBC = function(uri) {
   var defer = libQ.defer();
 
   var streamUrl = self.bbcPodcastRadio + uri;
-  //self.logger.info("Podcast:"+ streamUrl);
 
   var waitMessage = self.getPodcastI18nString('WAIT_BBC_PODCAST_LIST');
   waitMessage = waitMessage.replace('{0}', uri);
@@ -554,7 +552,7 @@ ControllerPodcast.prototype.getPodcastBBC = function(uri) {
           };
           response.navigation.lists[0].items.push(channel);
         }
-        //self.logger.info("getPodcastBBC:"+ JSON.stringify(response));
+        self.logger.info("getPodcastBBC:"+ JSON.stringify(response));
 
         defer.resolve(response);
       });
@@ -571,7 +569,6 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(channel, uri) {
   var self = this;
   var defer = libQ.defer();
 
-  self.logger.info("Podcast:post:"+ uri);
   var rssParser = new RssParser({
     customFields: {
       channel: ['image'],
@@ -611,7 +608,6 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(channel, uri) {
         response.navigation.lists[0].title =
             self.getPodcastI18nString('TITLE_' + channel.toUpperCase()) + '/' + feed.title;
         self.bbcEpisodeImage = feed.itunes.image;
-        //self.logger.info("Podcast:IMAGE:"+self.bbcEpisodeImage);
 
         self.currentEpisodes = [];
         feed.items.forEach(function (entry, index) {
@@ -621,7 +617,6 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(channel, uri) {
             title: entry.title,
             icon: 'fa fa-podcast',
             uri: 'podcast/bbc/'+ index
-            //uri: 'podcast/bbc/'+ index + '/'+ entry.enclosureSecure.$.url + '|' + entry.title + '|' + feed.title
           };
           self.currentEpisodes.push({
             index: index,
@@ -631,7 +626,6 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(channel, uri) {
           });
           response.navigation.lists[0].items.push(channel);
         });
-        //self.logger.info("getPodcastBBCEpisodes:"+ JSON.stringify(response));
         defer.resolve(response);
       });
 
@@ -641,22 +635,17 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(channel, uri) {
 ControllerPodcast.prototype.explodeUri = function (uri) {
   var self = this;
   var defer = libQ.defer();
-  var uris = uri.split("/", 3);
+  var uris = uri.split("/");
   var response;
 
+  var episode = self.currentEpisodes[uris[2]];
   switch (uris[1]) {
     case 'bbc':
-      //var uriInfo = uri.match(/podcast\/bbc\/[0-9]+\/(.*)\|(.*)\|(.*)/);
-
-      var episode = self.currentEpisodes[uris[2]];
       response = {
         service: self.serviceName,
         type: 'track',
-        //uri: uriInfo[1],
         uri: episode.url,
         trackType: self.getPodcastI18nString('PLUGIN_NAME'),
-        //name: uriInfo[2],
-        //album: uriInfo[3],
         name: episode.title,
         album: episode.album,
         albumart: self.bbcEpisodeImage
@@ -664,16 +653,11 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
       break;
 
     default:
-      //var uriInfo = uri.match(/podcast\/[0-9]+\/(.*)\|(.*)/);
-
-      var episode = self.currentEpisodes[uris[2]];
       response = {
         service: self.serviceName,
         type: 'track',
-        //uri: uriInfo[1],
         uri: episode.url,
         trackType: self.getPodcastI18nString('PLUGIN_NAME'),
-        //name: uriInfo[2],
         name: episode.title,
         albumart: self.podcasts.items[uris[1]].image,
         serviceName: self.serviceName
@@ -738,7 +722,6 @@ ControllerPodcast.prototype.getState = function () {
       collectedState.uri = trackinfo.uri;
       collectedState.trackType = trackinfo.trackType.split('?')[0];
       collectedState.serviceName = trackinfo.serviceName;
-      return collectedState;
     } else {
       collectedState.isStreaming = false;
       collectedState.title = null;
@@ -746,8 +729,8 @@ ControllerPodcast.prototype.getState = function () {
       collectedState.album = null;
       collectedState.uri = null;
       collectedState.serviceName = trackinfo.serviceName;
-      return collectedState;
     }
+    return collectedState;
   });
 };
 
@@ -756,7 +739,6 @@ ControllerPodcast.prototype.pushState = function (state) {
 
   self.logger.info("Podcast:pushState:"+ JSON.stringify(state));
 
-  //if (state.serviceName === self.serviceName)
   return self.commandRouter.servicePushState(state, self.serviceName);
 };
 
@@ -809,7 +791,7 @@ ControllerPodcast.prototype.loadPodcastsResource = function() {
 
   self.podcasts = fs.readJsonSync(__dirname+'/podcasts_list.json');
 
-  // BBC Radio Podcast
+  // BBC Radio podcast resource
   var findItem = _.find(self.podcasts.items, function(item) {
     return item.custom === "bbc";
   });
