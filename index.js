@@ -416,7 +416,7 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
       response.navigation.lists[0].title = feed.title;
 
       self.currentEpisodes = [];
-      feed.items.forEach(function (entry, index) {
+      feed.items.some(function (entry, index) {
         var podcastItem = {
           service: self.serviceName,
           type: 'song',
@@ -429,6 +429,8 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
           title: entry.title
         });
         response.navigation.lists[0].items.push(podcastItem);
+
+        return (index >= 200);  // limits podcast episodes
       });
       defer.resolve(response);
     });
