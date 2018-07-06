@@ -1,7 +1,7 @@
 {
   "items": [
     {
-      "id": "azcdddgugtnqloiwi",
+      "id": "gjpfvlbj52ptte7y",
       "title": "BBC Podcasts",
       "home": "http://www.bbc.co.uk/podcasts/",
       "url": "http://podcasts.files.bbci.co.uk/",
@@ -25,47 +25,47 @@
     {
       "title": "BBC Radio1 Podcast",
       "uri": "podcast/bbc/radio1",
-      "albumart": "bbc_radio_1.png"
+      "albumart": "bbc_radio_1.jpg"
     },
     {
       "title": "BBC Radio2 Podcast",
       "uri": "podcast/bbc/radio2",
-      "albumart": "bbc_radio_2.png"
+      "albumart": "bbc_radio_2.jpg"
     },
     {
       "title": "BBC Radio3 Podcast",
       "uri": "podcast/bbc/radio3",
-      "albumart": "bbc_radio_3.png"
+      "albumart": "bbc_radio_3.jpg"
     },
     {
       "title": "BBC Radio4 Podcast",
       "uri": "podcast/bbc/radio4",
-      "albumart": "bbc_radio_4.png"
+      "albumart": "bbc_radio_4.jpg"
     },
     {
       "title": "BBC Radio4 Extra Podcast",
       "uri": "podcast/bbc/radio4extra",
-      "albumart": "bbc_radio_4_extra.png"
+      "albumart": "bbc_radio_4_extra.jpg"
     },
     {
       "title": "BBC Radio5 live Podcast",
       "uri": "podcast/bbc/5live",
-      "albumart": "bbc_radio_5_live.png"
+      "albumart": "bbc_radio_5_live.jpg"
     },
     {
       "title": "BBC Radio6 Music Podcast",
       "uri": "podcast/bbc/6music",
-      "albumart": "bbc_radio_6_music.png"
+      "albumart": "bbc_radio_6_music.jpg"
     },
     {
       "title": "BBC Asian Network",
       "uri": "podcast/bbc/asiannetwork",
-      "albumart": "bbc_asian_network.png"
+      "albumart": "bbc_asian_network.jpg"
     },
     {
       "title": "BBC World Service",
       "uri": "podcast/bbc/worldserviceradio",
-      "albumart": "bbc_world_service.png"
+      "albumart": "bbc_world_service.jpg"
     }
   ]
 }

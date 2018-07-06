@@ -357,7 +357,7 @@ ControllerPodcast.prototype.getRootContent = function() {
       imageUrl = '/albumart?sourceicon=music_service/podcast/default.jpg';
 
     if (entry.custom === 'bbc')
-      imageUrl = '/albumart?sourceicon=music_service/podcast/logos/bbc.svg';
+      imageUrl = '/albumart?sourceicon=music_service/podcast/logos/bbc.jpg';
 
     var podcast = {
       service: self.serviceName,
@@ -425,7 +425,6 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
           uri: 'podcast/' + uris[1] + '/' + index
         };
         self.currentEpisodes.push({
-          index: index,
           url: entry.enclosure.url,
           title: entry.title
         });
@@ -546,14 +545,11 @@ ControllerPodcast.prototype.getPodcastBBC = function(station) {
             service: self.serviceName,
             type: 'folder',
             title: title,
-            //icon: 'fa fa-folder-open-o',
             albumart: 'http:' + parseResult[item].img,
             uri: 'podcast/bbc/' + station + '/' + parseResult[item].uri.match(/programmes\/(.*)\/episodes/)[1]
           };
           response.navigation.lists[0].items.push(folderInfo);
         }
-        self.logger.info("getPodcastBBC:"+ JSON.stringify(response));
-
         defer.resolve(response);
       });
 
@@ -586,7 +582,7 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(station, channel) {
       self.getPodcastI18nString('WAIT_BBC_PODCAST_ITEMS')
   );
 
-  rssParser.parseURL(self.bbcPodcastRSS + uri + '.rss',
+  rssParser.parseURL(self.bbcPodcastRSS + channel + '.rss',
       function (err, feed) {
         var response = {
           "navigation": {
@@ -619,7 +615,6 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(station, channel) {
             uri: 'podcast/bbc/'+ station + '/' + channel + '/' + index
           };
           self.currentEpisodes.push({
-            index: index,
             url: entry.enclosureSecure.$.url,
             title: entry.title,
             album: feed.title
@@ -666,8 +661,6 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
         serviceName: self.serviceName
       };
   }
-  self.logger.info("explodeUri:"+ JSON.stringify(response));
-
   defer.resolve(response);
 
   return defer.promise;
@@ -733,7 +726,7 @@ ControllerPodcast.prototype.getState = function () {
       collectedState.artist = null;
       collectedState.album = null;
       collectedState.uri = null;
-      collectedState.serviceName = trackinfo.serviceName;
+      collectedState.serviceName = self.serviceName;
     }
     return collectedState;
   });
@@ -741,8 +734,6 @@ ControllerPodcast.prototype.getState = function () {
 
 ControllerPodcast.prototype.pushState = function (state) {
   var self = this;
-
-  self.logger.info("Podcast:pushState:"+ JSON.stringify(state));
 
   return self.commandRouter.servicePushState(state, self.serviceName);
 };
