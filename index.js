@@ -475,14 +475,14 @@ ControllerPodcast.prototype.getRootBbcContent = function() {
 };
 
 
-ControllerPodcast.prototype.getPodcastBBC = function(uri) {
+ControllerPodcast.prototype.getPodcastBBC = function(station) {
   var self = this;
   var defer = libQ.defer();
 
-  var streamUrl = self.bbcPodcastRadio + uri;
+  var streamUrl = self.bbcPodcastRadio + station;
 
   var waitMessage = self.getPodcastI18nString('WAIT_BBC_PODCAST_LIST');
-  waitMessage = waitMessage.replace('{0}', uri);
+  waitMessage = waitMessage.replace('{0}', station);
   self.commandRouter.pushToastMessage(
       'info',
       self.getPodcastI18nString('PLUGIN_NAME'),
@@ -533,7 +533,7 @@ ControllerPodcast.prototype.getPodcastBBC = function(uri) {
           }
         };
 
-        response.navigation.lists[0].title = self.getPodcastI18nString('TITLE_' + uri.toUpperCase());
+        response.navigation.lists[0].title = self.getPodcastI18nString('TITLE_' + station.toUpperCase());
         for (var item in parseResult) {
           var title;
 
@@ -542,15 +542,15 @@ ControllerPodcast.prototype.getPodcastBBC = function(uri) {
           else
             title = parseResult[item].title;
 
-          var channel = {
+          var folderInfo = {
             service: self.serviceName,
             type: 'folder',
             title: title,
             //icon: 'fa fa-folder-open-o',
             albumart: 'http:' + parseResult[item].img,
-            uri: 'podcast/bbc/' + uri + '/' + parseResult[item].uri.match(/programmes\/(.*)\/episodes/)[1]
+            uri: 'podcast/bbc/' + station + '/' + parseResult[item].uri.match(/programmes\/(.*)\/episodes/)[1]
           };
-          response.navigation.lists[0].items.push(channel);
+          response.navigation.lists[0].items.push(folderInfo);
         }
         self.logger.info("getPodcastBBC:"+ JSON.stringify(response));
 
@@ -565,7 +565,7 @@ ControllerPodcast.prototype.getPodcastBBC = function(uri) {
   return defer.promise;
 };
 
-ControllerPodcast.prototype.getPodcastBBCEpisodes = function(channel, uri) {
+ControllerPodcast.prototype.getPodcastBBCEpisodes = function(station, channel) {
   var self = this;
   var defer = libQ.defer();
 
@@ -601,22 +601,22 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(channel, uri) {
               }
             ],
             "prev": {
-              "uri": "podcast/bbc/" + channel
+              "uri": "podcast/bbc/" + station
             }
           }
         };
         response.navigation.lists[0].title =
-            self.getPodcastI18nString('TITLE_' + channel.toUpperCase()) + '/' + feed.title;
+            self.getPodcastI18nString('TITLE_' + station.toUpperCase()) + '/' + feed.title;
         self.bbcEpisodeImage = feed.itunes.image;
 
         self.currentEpisodes = [];
         feed.items.forEach(function (entry, index) {
-          var channel = {
+          var folderInfo = {
             service: self.serviceName,
             type: 'song',
             title: entry.title,
             icon: 'fa fa-podcast',
-            uri: 'podcast/bbc/'+ index
+            uri: 'podcast/bbc/'+ station + '/' + channel + '/' + index
           };
           self.currentEpisodes.push({
             index: index,
@@ -624,7 +624,7 @@ ControllerPodcast.prototype.getPodcastBBCEpisodes = function(channel, uri) {
             title: entry.title,
             album: feed.title
           });
-          response.navigation.lists[0].items.push(channel);
+          response.navigation.lists[0].items.push(folderInfo);
         });
         defer.resolve(response);
       });
@@ -636,11 +636,12 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
   var self = this;
   var defer = libQ.defer();
   var uris = uri.split("/");
-  var response;
+  var response, episode;
 
-  var episode = self.currentEpisodes[uris[2]];
   switch (uris[1]) {
     case 'bbc':
+      // podcast/bbc/station/channel/index
+      episode = self.currentEpisodes[uris[4]];
       response = {
         service: self.serviceName,
         type: 'track',
@@ -653,6 +654,8 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
       break;
 
     default:
+      // podcast/channel/index
+      episode = self.currentEpisodes[uris[2]];
       response = {
         service: self.serviceName,
         type: 'track',
@@ -663,6 +666,8 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
         serviceName: self.serviceName
       };
   }
+  self.logger.info("explodeUri:"+ JSON.stringify(response));
+
   defer.resolve(response);
 
   return defer.promise;
