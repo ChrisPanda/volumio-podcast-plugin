@@ -430,7 +430,7 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
         });
         response.navigation.lists[0].items.push(podcastItem);
 
-        return (index >= 200);  // limits podcast episodes
+        return (index >= 300);  // limits podcast episodes
       });
       defer.resolve(response);
     });
@@ -445,6 +445,7 @@ ControllerPodcast.prototype.getRootBbcContent = function() {
     "navigation": {
       "lists": [
         {
+          title: self.getPodcastI18nString('TITLE_BBC'),
           icon: 'fa fa-podcast',
           "availableListViews": [
             "list", "grid"
@@ -474,7 +475,6 @@ ControllerPodcast.prototype.getRootBbcContent = function() {
 
   return defer.promise;
 };
-
 
 ControllerPodcast.prototype.getPodcastBBC = function(station) {
   var self = this;
