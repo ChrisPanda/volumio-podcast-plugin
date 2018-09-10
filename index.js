@@ -174,12 +174,14 @@ ControllerPodcast.prototype.addPodcast = function(data) {
       self.getPodcastI18nString('ADD_PODCAST_PROCESSING')
   );
 
-  var headers = {
-    'Accept': '*/*',
-    'User-Agent': 'Mozilla/5.0'
+  var options = {
+    headers: {
+      'Accept': '*/*',
+      'User-Agent': 'Mozilla/5.0'
+    }
   };
 
-  rss.query(rssUrl, headers).then(
+  rss.query(rssUrl, options).then(
     function (feed) {
       var imageUrl = feed.channel.imageUrl;
       var podcastItem = {
@@ -389,12 +391,14 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
       message
   );
 
-  var headers = {
-    'Accept': '*/*',
-    'User-Agent': 'Mozilla/5.0'
+  var options = {
+    headers: {
+      'Accept': '*/*',
+      'User-Agent': 'Mozilla/5.0'
+    }
   };
 
-  rss.query(self.podcasts.items[uris[1]].url, headers).then(function (feed) {
+  rss.query(self.podcasts.items[uris[1]].url, options).then(function (feed) {
     response.navigation.lists[0].title = feed.title;
 
     self.currentEpisodes = [];

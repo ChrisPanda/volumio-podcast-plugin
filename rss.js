@@ -25,26 +25,28 @@ function getParams(str) {
   return params;
 }
 
-function queryFeed(url, headers, maxItems) {
-  headers = headers || {};
-  maxItems = maxItems || 300;
-  var errored = false;
+function queryFeed(url, options) {
+  if (!url) {
+    return libQ.defer().fail('no URL provided');
+  }
+
+  var maxItems = options.maxItems || 300;
+  var resolved = false;
   var defer = libQ.defer();
-  var req = request(url)
-  for (var h in headers) {
-    req.setHeader(h, headers[h]);
+  var req = request(url, {timeout: options.timeout || 1000})
+  for (var h in _.get(options, 'headers', {})) {
+    req.setHeader(h, options.headers[h]);
   }
 
   var feedparser = new FeedParser();
 
-  req.on('error', function (error) {
-    errored = true;
-    defer.reject(error);
+  req.on('error', error => {
+    feedparser.emit('error', new Error(error));
   });
 
   req.on('response', function (res) {
     if (res.statusCode !== 200) {
-      return this.emit('error', new Error('Bad status code'));
+      return feedparser.emit('error', new Error('Bad status code'));
     }
     var encoding = res.headers['content-encoding'] || 'identity';
     var charset = getParams(res.headers['content-type'] || '').charset;
@@ -52,9 +54,11 @@ function queryFeed(url, headers, maxItems) {
     res.pipe(feedparser);
   });
 
-  feedparser.on('error', function (error) {
-    errored = true;
-    defer.reject(error);
+  feedparser.on('error', error => {
+    if (!resolved) {
+      defer.reject(error);
+      resolved = true;
+    }
   });
 
   var channel = {};
@@ -68,6 +72,10 @@ function queryFeed(url, headers, maxItems) {
 
   var items = [];
   feedparser.on('readable', function () {
+    if (resolved) {
+      return;
+    }
+
     var stream = this;
     var meta = this.meta;
 
@@ -80,8 +88,9 @@ function queryFeed(url, headers, maxItems) {
   });
 
   feedparser.on('end', function() {
-    if (!errored) {
+    if (!resolved) {
       defer.resolve({channel: channel, items: items});
+      resolved = true;
     }
   });
 
