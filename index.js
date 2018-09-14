@@ -11,7 +11,7 @@ var _ = require('lodash');
 module.exports = ControllerPodcast;
 
 function ControllerPodcast(context) {
-	var self = this;
+  var self = this;
 
   self.context = context;
   self.commandRouter = this.context.coreCommand;
@@ -107,7 +107,7 @@ ControllerPodcast.prototype.getUIConfig = function() {
 };
 
 ControllerPodcast.prototype.updateUIConfig = function() {
-  var self=this;
+  var self = this;
 
   var lang_code = self.commandRouter.sharedVars.get('language_code');
   self.commandRouter.i18nJson(__dirname+'/i18n/strings_' + lang_code + '.json',
@@ -146,7 +146,7 @@ ControllerPodcast.prototype.setUIConfig = function(data)
 
 // Podcast Methods -----------------------------------------------------
 ControllerPodcast.prototype.addPodcast = function(data) {
-  var self=this;
+  var self = this;
   var defer = libQ.defer();
   var rssUrl = data['input_podcast'].trim();
   var message;
@@ -254,7 +254,7 @@ ControllerPodcast.prototype.deletePodcast = function(data) {
 };
 
 ControllerPodcast.prototype.deletePodcastConfirm = function(data) {
-  var self=this;
+  var self = this;
   var defer = libQ.defer();
 
   self.podcasts.items = _.remove(self.podcasts.items, function(item) {
@@ -273,7 +273,7 @@ ControllerPodcast.prototype.deletePodcastConfirm = function(data) {
 };
 
 ControllerPodcast.prototype.showDialogMessage = function(message) {
-  var self=this;
+  var self = this;
 
   var modalData = {
     title: self.getPodcastI18nString('PLUGIN_NAME'),
@@ -329,7 +329,7 @@ ControllerPodcast.prototype.handleBrowseUri = function (curUri) {
 };
 
 ControllerPodcast.prototype.getRootContent = function() {
-  var self=this;
+  var self = this;
   var response;
   var defer = libQ.defer();
 
@@ -417,19 +417,20 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
 
       self.currentEpisodes = [];
       feed.items.some(function (entry, index) {
-        var podcastItem = {
-          service: self.serviceName,
-          type: 'song',
-          title: entry.title,
-          icon: 'fa fa-podcast',
-          uri: 'podcast/' + uris[1] + '/' + index
-        };
-        self.currentEpisodes.push({
-          url: entry.enclosure.url,
-          title: entry.title
-        });
-        response.navigation.lists[0].items.push(podcastItem);
-
+        if (entry.enclosure && entry.enclosure.url) {
+          var podcastItem = {
+            service: self.serviceName,
+            type: 'song',
+            title: entry.title,
+            icon: 'fa fa-podcast',
+            uri: 'podcast/' + uris[1] + '/' + index
+          };
+          self.currentEpisodes.push({
+            url: entry.enclosure.url,
+            title: entry.title
+          });
+          response.navigation.lists[0].items.push(podcastItem);
+        }
         return (index >= 300);  // limits podcast episodes
       });
       defer.resolve(response);
@@ -747,7 +748,7 @@ ControllerPodcast.prototype.seek = function (position) {
 };
 
 ControllerPodcast.prototype.stop = function() {
-	var self = this;
+  var self = this;
 
   self.commandRouter.pushToastMessage(
       'info',
@@ -785,7 +786,7 @@ ControllerPodcast.prototype.resume = function() {
 
 // resource functions for Podcast -----------------------------------
 ControllerPodcast.prototype.loadPodcastsResource = function() {
-  var self=this;
+  var self = this;
 
   self.podcasts = fs.readJsonSync(__dirname+'/podcasts_list.json');
 
@@ -800,7 +801,7 @@ ControllerPodcast.prototype.loadPodcastsResource = function() {
 };
 
 ControllerPodcast.prototype.loadPodcastI18nStrings = function () {
-  var self=this;
+  var self = this;
 
   try {
     var language_code = self.commandRouter.sharedVars.get('language_code');
@@ -813,7 +814,7 @@ ControllerPodcast.prototype.loadPodcastI18nStrings = function () {
 };
 
 ControllerPodcast.prototype.getPodcastI18nString = function (key) {
-  var self=this;
+  var self = this;
 
   if (self.i18nStrings[key] !== undefined)
     return self.i18nStrings[key];
