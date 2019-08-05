@@ -494,6 +494,7 @@ ControllerPodcast.prototype.getPodcastBBC = function(station) {
     "navigation": {
       "lists": [
         {
+          title: self.getPodcastI18nString('TITLE_' + station.toUpperCase()),
           icon: 'fa fa-podcast',
           "availableListViews": [
             "list", "grid"
@@ -512,8 +513,6 @@ ControllerPodcast.prototype.getPodcastBBC = function(station) {
   .get(streamUrl)
   .end(function (response) {
     if (response.status === 200) {
-      responseResult.navigation.lists[0].title = self.getPodcastI18nString('TITLE_' + station.toUpperCase());
-
       var $ = cheerio.load(response.body);
       var podcastList = $('ul.podcast-list');
       podcastList.find('li.grid__item').each(function (i, elem) {
