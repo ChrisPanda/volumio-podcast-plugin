@@ -6,7 +6,6 @@ var unirest = require('unirest');
 var RssParser = require('rss-parser');
 var _ = require('lodash');
 var cheerio = require('cheerio');
-var zlib = require('zlib');
 
 module.exports = ControllerPodcast;
 
@@ -491,69 +490,30 @@ ControllerPodcast.prototype.getPodcastBBC = function(station) {
       waitMessage
   );
 
+  var responseResult = {
+    "navigation": {
+      "lists": [
+        {
+          icon: 'fa fa-podcast',
+          "availableListViews": [
+            "list", "grid"
+          ],
+          "items": [
+          ]
+        }
+      ],
+      "prev": {
+        "uri": "podcast/bbc"
+      }
+    }
+  };
+
   unirest
   .get(streamUrl)
   .end(function (response) {
     if (response.status === 200) {
-      /*
-      htmlToJson.parse(response.body, ['a[data-istats-package]',
-        {
-          'uri': function ($a) {
-            return $a.attr('href');
-          },
-          'title': function ($a) {
-            return $a.find('h3[class]').text().trim();
-          },
-          'img': function ($a) {
-            return $a.find('img[aria-hidden]').attr('src');
-          },
-          'badge': function ($a) {
-            var obj = $a.find('div[class]');
-            if ( (obj[2] !== undefined) && obj[2].attribs.class.startsWith('badge') ) {
-              return obj[2].children[0].data;
-            }
-            else
-              return null;
-          }
-        }
-      ])
-      .done(function (parseResult) {
-        var response = {
-          "navigation": {
-            "lists": [
-              {
-                icon: 'fa fa-podcast',
-                "availableListViews": [
-                  "list", "grid"
-                ],
-                "items": [
-                ]
-              }
-            ],
-            "prev": {
-              "uri": "podcast/bbc"
-            }
-          }
-        };
+      responseResult.navigation.lists[0].title = self.getPodcastI18nString('TITLE_' + station.toUpperCase());
 
-       */
-      var response = {
-        "navigation": {
-          "lists": [
-            {
-              icon: 'fa fa-podcast',
-              "availableListViews": [
-                "list", "grid"
-              ],
-              "items": [
-              ]
-            }
-          ],
-          "prev": {
-            "uri": "podcast/bbc"
-          }
-        }
-      };
       var $ = cheerio.load(response.body);
       var podcastList = $('ul.podcast-list');
       podcastList.find('li.grid__item').each(function (i, elem) {
@@ -562,10 +522,8 @@ ControllerPodcast.prototype.getPodcastBBC = function(station) {
         var badge = $(this).find('div.badge').text()
         var link = $(this).find('a.rmp-card__body').attr('href');
         var rssAddr = link.match(/programmes\/(.*)\/episodes/)[1];
-        console.log('rssAddr=', rssAddr);
-        response.navigation.lists[0].title = self.getPodcastI18nString('TITLE_' + station.toUpperCase());
 
-        if (badge !== null)
+        if (badge)
           title = '[' +  badge + ']: ' + title;
 
         var folderInfo = {
@@ -575,14 +533,10 @@ ControllerPodcast.prototype.getPodcastBBC = function(station) {
           albumart: 'http:' + image,
           uri: 'podcast/bbc/' + station + '/' + rssAddr
         };
-        self.logger.info("ControllerPodcast::PODCASTLIST:", folderInfo);
-        response.navigation.lists[0].items.push(folderInfo);
+        responseResult.navigation.lists[0].items.push(folderInfo);
       });
-      defer.resolve(response);
-
-    } else {
-      defer.resolve(null);
     }
+    defer.resolve(responseResult);
   });
 
   return defer.promise;
