@@ -512,6 +512,7 @@ ControllerPodcast.prototype.getPodcastBBC = function(station) {
   unirest
   .get(streamUrl)
   .end(function (response) {
+    var folderInfo
     if (response.status === 200) {
       var $ = cheerio.load(response.body);
       var podcastList = $('ul.podcast-list');
@@ -521,20 +522,31 @@ ControllerPodcast.prototype.getPodcastBBC = function(station) {
         var badge = $(this).find('div.badge').text()
         var link = $(this).find('a.rmp-card__body').attr('href');
         var rssAddr = link.match(/programmes\/(.*)\/episodes/)[1];
+        var uri = ""
 
+        if (rssAddr)
+          uri = 'podcast/bbc/' + station + '/' + rssAddr
         if (badge)
           title = '[' +  badge + ']: ' + title;
-
-        var folderInfo = {
+        folderInfo = {
           service: self.serviceName,
           type: 'folder',
           title: title,
           albumart: 'http:' + image,
-          uri: 'podcast/bbc/' + station + '/' + rssAddr
+          uri: uri
         };
         responseResult.navigation.lists[0].items.push(folderInfo);
       });
     }
+    else {
+      folderInfo = {
+        service: self.serviceName,
+        type: 'folder',
+        title: "BBC server response error"
+      }
+      responseResult.navigation.lists[0].items.push(folderInfo);
+    }
+
     defer.resolve(responseResult);
   });
 
