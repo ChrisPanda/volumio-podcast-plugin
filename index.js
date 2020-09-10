@@ -634,7 +634,7 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
   switch (uris[1]) {
     case 'bbc':
       // podcast/bbc/station/channel/index
-      if (uris.length <= 5) {
+      if (uris.length < 5) {
         response = libQ.reject();
         return response;
       }
@@ -653,7 +653,7 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
 
     default:
       // podcast/channel/index
-      if (uris.length <= 3) {
+      if (uris.length < 3) {
         response = libQ.reject();
         return response;
       }
