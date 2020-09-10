@@ -14,3 +14,6 @@ Delete podcast
     
 Predefined Podcast
   - BBC Radio 1, 2, 3, 4, 4extra, 5live, 5live sports extra, 6music, world service
+  
+Developers Note:
+  - There is a problem of using fs-extra package (over version 8)  
