@@ -57,6 +57,35 @@
           "description": "TRANSLATE.CONFIG.ADD_PODCAST_NOTE"
         }
       ]
+    },
+    {
+      "id": "section_support",
+      "element": "section",
+      "label": "TRANSLATE.CONFIG.SUPPORT_PLUGIN",
+      "description": "TRANSLATE.CONFIG.SUPPORT_DESCRIPTION",
+      "icon": "fa-life-ring",
+      "content": [
+        {
+          "id": "support_korean",
+          "element": "button",
+          "label": "TRANSLATE.CONFIG.SUPPORT_KOREAN",
+          "description": "TRANSLATE.CONFIG.SUPPORT_KOREAN_LINK_DESCRIPTION",
+          "onClick": {
+            "type": "openUrl",
+            "url": "https://donaricano.com/creator/chrisong"
+          }
+        },
+        {
+          "id": "support_korean",
+          "element": "button",
+          "label": "TRANSLATE.CONFIG.SUPPORT_FOREIGNER",
+          "description": "TRANSLATE.CONFIG.SUPPORT_FOREIGNER_LINK_DESCRIPTION",
+          "onClick": {
+            "type": "openUrl",
+            "url": "https://paypal.me/ckchrispanda"
+          }
+        }
+      ]
     }
   ]
 }

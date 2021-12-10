@@ -34,5 +34,12 @@
     "ADD_PODCAST_NOTE": "Hinweis: http(s) Podcast RSS Feed url",
     "DELETE_PODCAST_DESCRIPTION": "Bitte den zu löschenden Podcast wählen",
     "ADD_PODCAST_DESCRIPTION": "RSS Feed URL einfügen"
-  }
+  },
+  "SUPPORT": "Ondersteuning",
+  "SUPPORT_KOREAN": "Ondersteuning in Korea (door KakaoPay)",
+  "SUPPORT_FOREIGNER": "Ondersteuning buiten Korea (via PayPal)",
+  "SUPPORT_KOREAN_LINK_DESCRIPTION": "Ga naar de Koreaanse ondersteuningssite 'Donaricano'",
+  "SUPPORT_FOREIGNER_LINK_DESCRIPTION": "Ga naar de 'PayPal.Me' buiten korea ondersteuningssite",
+  "SUPPORT_PLUGIN": "Plugin-ondersteuning",
+  "SUPPORT_DESCRIPTION": "Ondersteun deze podcast-plug-in. Bedankt."
 }
