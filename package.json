@@ -1,7 +1,7 @@
 {
   "name": "podcast",
-  "version": "0.3.0",
-  "description": "Podcast for Volumio2",
+  "version": "2.0.0",
+  "description": "Podcast for Volumio",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -12,16 +12,21 @@
   "volumio_info": {
     "prettyName": "Podcast",
     "icon": "fa-podcast",
-    "plugin_type": "music_service"
+    "plugin_type": "music_service",
+    "details": "Podcast Plugin for Volumio. You can search, add and delete podcasts.",
+    "architectures": [
+      "amd64",
+      "armhf",
+      "i386"
+    ]
   },
   "dependencies": {
-    "v-conf": "^1.4.2",
-    "fs-extra": "^8.1.0",
+    "v-conf": "^1.4.3",
+    "fs-extra": "^10.0.0",
     "kew": "^0.7.0",
-    "rss-parser": "^3.9.0",
-    "lodash": "^4.17.20",
-    "unirest": "^0.6.0",
-    "cheerio": "^1.0.0-rc.3"
+    "node-cache": "^5.1.2",
+    "fast-xml-parser": "^4.0.1",
+    "node-fetch": "^2.6.6"
   },
   "repository": {
     "type": "git",
@@ -34,5 +39,9 @@
   "bugs": {
     "url": "https://github.com/ChrisPanda/volumio-podcast-plugin/issues"
   },
-  "homepage": "https://github.com/ChrisPanda/volumio-podcast-plugin#readme"
+  "homepage": "https://github.com/ChrisPanda/volumio-podcast-plugin#readme",
+  "engines": {
+    "volumio": ">=2",
+    "node": ">=14.15.4"
+  }
 }

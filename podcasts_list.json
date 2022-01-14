@@ -1,13 +1,6 @@
 {
+  "maxEpisode": 100,
   "items": [
-    {
-      "id": "gjpfvlbj52ptte7y",
-      "title": "BBC Podcasts",
-      "home": "http://www.bbc.co.uk/podcasts/",
-      "url": "http://podcasts.files.bbci.co.uk/",
-      "image": "bbc.svg",
-      "custom": "bbc"
-    },
     {
       "id": "oakcdgugtnqloiwi",
       "title": "The Daily",
@@ -15,57 +8,34 @@
       "image": "https://dfkfj8j276wwv.cloudfront.net/images/01/1b/f3/d6/011bf3d6-a448-4533-967b-e2f19e376480/7fdd4469c1b5cb3b66aa7dcc9fa21f138efe9a0310a8a269f3dcd07c83a552844fcc445ea2d53db1e55d6fb077aeaa8a1566851f8f2d8ac4349d9d23a87a69f5.jpeg"
     },
     {
-      "id": "u1obuqbc20o9ms2v",
+      "id": "73kxx72ptlvhaw43",
+      "title": "Tiny Desk Concerts - Audio",
+      "url": "https://feeds.npr.org/510306/podcast.xml",
+      "image": "https://media.npr.org/assets/img/2018/08/06/npr_tdconcerts_podcasttile_sq-847b3b155884b4eae85d630923cdef53f8429729.jpg?s=1400"
+    },
+    {
+      "id": "2jaa0vpkz4syug0c",
+      "title": "TED Radio Hour",
+      "url": "https://feeds.npr.org/510298/podcast.xml",
+      "image": "https://media.npr.org/assets/img/2020/03/09/trh_podcast-tile_sq-c05fb259465d433a5cf8a21248b8fa209a6b7690.png?s=1400"
+    },
+    {
+      "id": "yeyxwg9plz0i7ay7",
+      "title": "TED Talks Daily",
+      "url": "http://feeds.feedburner.com/TEDTalks_audio",
+      "image": "https://pl.tedcdn.com/rss_feed_images/ted_talks_main_podcast/audio.png"
+    },
+    {
+      "id": "a3yrp5k0ciqqm9r7",
       "title": "Anderson Cooper 360",
-      "url": "http://feeds.adknit.com/app-search/cnn/anderson-cooper-360/all/1080/200",
-      "image": "https://www.omnycontent.com/d/playlist/d83f52e4-2455-47f4-982e-ab790120b954/a6c57f01-d29f-4556-be4b-ab86002f5bc5/f3bbd658-5edf-479a-9aa7-ab86002f5bd7/image.jpg"
-    }
-  ],
-  "bbc": [
-    {
-      "title": "BBC Radio1 Podcast",
-      "uri": "podcast/bbc/radio1",
-      "albumart": "bbc_radio_1.jpg"
+      "url": "https://www.omnycontent.com/d/playlist/d83f52e4-2455-47f4-982e-ab790120b954/a6c57f01-d29f-4556-be4b-ab86002f5bc5/f3bbd658-5edf-479a-9aa7-ab86002f5bd7/podcast.rss",
+      "image": "https://www.omnycontent.com/d/playlist/d83f52e4-2455-47f4-982e-ab790120b954/a6c57f01-d29f-4556-be4b-ab86002f5bc5/f3bbd658-5edf-479a-9aa7-ab86002f5bd7/image.jpg?t=1623353373&size=Large"
     },
     {
-      "title": "BBC Radio2 Podcast",
-      "uri": "podcast/bbc/radio2",
-      "albumart": "bbc_radio_2.jpg"
-    },
-    {
-      "title": "BBC Radio3 Podcast",
-      "uri": "podcast/bbc/radio3",
-      "albumart": "bbc_radio_3.jpg"
-    },
-    {
-      "title": "BBC Radio4 Podcast",
-      "uri": "podcast/bbc/radio4",
-      "albumart": "bbc_radio_4.jpg"
-    },
-    {
-      "title": "BBC Radio4 Extra Podcast",
-      "uri": "podcast/bbc/radio4extra",
-      "albumart": "bbc_radio_4_extra.jpg"
-    },
-    {
-      "title": "BBC Radio5 live Podcast",
-      "uri": "podcast/bbc/5live",
-      "albumart": "bbc_radio_5_live.jpg"
-    },
-    {
-      "title": "BBC Radio6 Music Podcast",
-      "uri": "podcast/bbc/6music",
-      "albumart": "bbc_radio_6_music.jpg"
-    },
-    {
-      "title": "BBC Asian Network",
-      "uri": "podcast/bbc/asiannetwork",
-      "albumart": "bbc_asian_network.jpg"
-    },
-    {
-      "title": "BBC World Service",
-      "uri": "podcast/bbc/worldserviceradio",
-      "albumart": "bbc_world_service.jpg"
+      "id": "clvvrh2wohpuz2t9",
+      "title": "Money Talks from The Economist",
+      "url": "https://rss.acast.com/theeconomistmoneytalks",
+      "image": "https://thumborcdn.acast.com/Y-2AP4jo4pwYbggozXg7Qu9KYDw=/1500x1500/https://mediacdn.acast.com/assets/39fc4a99-8861-437d-81e2-684d13e48f92/-k4bg127u-mt_itunes_new.jpg"
     }
   ]
 }
