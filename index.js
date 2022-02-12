@@ -611,6 +611,12 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
       if (!feed.rss.channel.item) {
         feed.rss.channel.item = [];
       }
+      if (!Array.isArray(feed.rss.channel.item)) {
+        var tempItem = feed.rss.channel.item;
+        feed.rss.channel.item = [];
+        feed.rss.channel.item.push(tempItem);
+      }
+
       feed.rss.channel.item.some(function (entry, index) {
         if (entry.enclosure && entry.enclosure.url) {
           var imageUrl;
