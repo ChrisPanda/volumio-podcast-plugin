@@ -4,8 +4,7 @@
   "description": "Podcast for Volumio",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "pack": "rm -R node_modules || npm install --production && zip -r -X build.zip ./ || npm install"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Chris Song",
   "license": "ISC",
@@ -13,7 +12,8 @@
     "prettyName": "Podcast",
     "icon": "fa-podcast",
     "plugin_type": "music_service",
-    "details": "Podcast Plugin for Volumio. You can search, add and delete podcasts.",
+    "details": "Podcast Plugin for Volumio.<br>You can search, add and delete podcasts at setup page and you can set favourite function for a podcast episode.",
+    "changelog": "2.1.0: fix the single episode problem",
     "architectures": [
       "amd64",
       "armhf",
@@ -28,10 +28,7 @@
     "fast-xml-parser": "^4.0.1",
     "node-fetch": "^2.6.6"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ChrisPanda/volumio-podcast-plugin.git"
-  },
+  "repository": "https://github.com/ChrisPanda/volumio-podcast-plugin",
   "keywords": [
     "podcast",
     "volumio"
