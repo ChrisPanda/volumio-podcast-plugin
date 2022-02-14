@@ -263,7 +263,8 @@ ControllerPodcast.prototype.fetchRssUrl = function(url) {
     .then((fetchData) => {
       const options = {
         ignoreAttributes : false,
-        attributeNamePrefix: ""
+        attributeNamePrefix: "",
+        removeNSPrefix: true
       };
 
       const parser = new XMLParser(options);
@@ -289,21 +290,17 @@ ControllerPodcast.prototype.checkAddPodcast = function(defer, rssUrl) {
   }
 
   self.showMessageToast('info', self.getPodcastI18nString('ADD_PODCAST_PROCESSING'));
-
   var urlObj = urlModule.parse(rssUrl);
-  // except ssenhosting rss url
+  // exception handling for ssenhosting host url
   if (urlObj.hostname === "pod.ssenhosting.com") {
     var pathValues = urlObj.pathname.substring(1).split("/");
-    console.log("RSS pathValues============", pathValues)
     if (pathValues.length === 2) {
-      pathValues[2] = pathValues[2].split(".").pop();
+      pathValues[1] = pathValues[1].split(".").shift();
     }
     if (pathValues.length === 3) {
-      pathValues.remove(2);
+      pathValues.splice(2,1);
     }
-    pathValues.join("/");
-    rssUrl = `${urlObj.protocol}//${urlObj.hostname}/${pathValues}`
-    console.log("RSS URL============", rssUrl, pathValues)
+    rssUrl = `${urlObj.protocol}//${urlObj.hostname}/${pathValues.join("/")}`
   }
 
   self.fetchRssUrl(rssUrl)
