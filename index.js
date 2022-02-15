@@ -264,8 +264,7 @@ ControllerPodcast.prototype.fetchRssUrl = function(url) {
     .then((fetchData) => {
       const options = {
         ignoreAttributes : false,
-        attributeNamePrefix: "",
-        removeNSPrefix: true
+        attributeNamePrefix: ""
       };
 
       const parser = new XMLParser(options);
@@ -284,13 +283,6 @@ ControllerPodcast.prototype.checkAddPodcast = function(defer, rssUrl) {
   var self=this;
   var message;
 
-  var findItem = self.podcasts.items.find( item => item.url === rssUrl);
-  if (findItem) {
-    self.showMessageToast('info', self.getPodcastI18nString('DUPLICATED_PODCAST'));
-    defer.resolve();
-    return;
-  }
-  self.showMessageToast('info', self.getPodcastI18nString('ADD_PODCAST_PROCESSING'));
   var urlObj = urlModule.parse(rssUrl);
   // exception handling for ssenhosting host url
   try {
@@ -314,14 +306,36 @@ ControllerPodcast.prototype.checkAddPodcast = function(defer, rssUrl) {
     return;
   }
 
+  var findItem = self.podcasts.items.find( item => item.url === rssUrl);
+  if (findItem) {
+    self.showMessageToast('info', self.getPodcastI18nString('DUPLICATED_PODCAST'));
+    defer.resolve();
+    return;
+  }
+  self.showMessageToast('info', self.getPodcastI18nString('ADD_PODCAST_PROCESSING'));
+
   self.fetchRssUrl(rssUrl)
   .then((feed) => {
     var imageUrl, podcastItem;
 
     if ( feed.rss.channel.image && feed.rss.channel.image.url )
       imageUrl = feed.rss.channel.image.url;
+    else if ( feed.rss.channel['itunes:image'] )
+      imageUrl = feed.rss.channel['itunes:image'].href;
     else if ( feed.rss.channel.itunes && feed.rss.channel.itunes.image )
       imageUrl = feed.rss.channel.itunes.image;
+
+    // check validation of image url
+    var validUrl;
+    try {
+      var checkUrl = new URL(imageUrl);
+      validUrl = checkUrl.protocol === "http:" || checkUrl.protocol === "https:"
+    }
+    catch (_) {
+      validUrl = false;
+    }
+    if (!validUrl)
+      imageUrl = '/albumart?sourceicon=music_service/podcast/default.jpg';
 
     const feedTitle = feed.rss.channel.title;
     podcastItem = {
