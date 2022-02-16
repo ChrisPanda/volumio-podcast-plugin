@@ -908,11 +908,11 @@ ControllerPodcast.prototype.loadPodcastI18nStrings = function () {
   try {
     var language_code = self.commandRouter.sharedVars.get('language_code');
     self.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_'+language_code+".json");
-    self.i18nCountry=fs.readJsonSync(__dirname+'/i18n/country_code.json');
   } catch(e) {
     self.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
   }
 
+  self.i18nCountry=fs.readJsonSync(__dirname+'/i18n/country_code.json');
   self.i18nStringsDefaults=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
 };
 

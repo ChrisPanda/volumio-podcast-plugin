@@ -13,7 +13,7 @@
     "icon": "fa-podcast",
     "plugin_type": "music_service",
     "details": "Podcast Plugin for Volumio.<br>You can search, add and delete podcasts at setup page and you can set favourite function for a podcast episode.",
-    "changelog": "fix the single episode problem; fix iTunes image url; add special rss url handling",
+    "changelog": "fix single episode problem; fix iTunes image url; fix the dissappearance of a region; add special rss url handling",
     "architectures": [
       "amd64",
       "armhf",
