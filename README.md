@@ -19,6 +19,12 @@ Developers Note:
 - There is a problem of using fs-extra package (over version 8)
 
 ## Change log
+### version 2.1.0
+* fix adding podcast problem that contains single episode
+* fix disappearance of a region
+* fix iTunes image url parsing in RSS feed
+* add special RSS url handling
+
 ### version 2.0.0
 * search podcast directory with keyword
 * add searched result of podcasts
