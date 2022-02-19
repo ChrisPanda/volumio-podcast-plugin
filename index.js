@@ -2,12 +2,8 @@
 
 const libQ = require('kew');
 const fs = require('fs-extra');
-const querystring = require('querystring');
-const {XMLParser} = require('fast-xml-parser');
 const NodeCache = require('node-cache');
-const fetch = require('node-fetch');
-const podcastSearchApi = 'https://itunes.apple.com';
-const urlModule = require('url');
+const podcast = require('podcast');
 
 module.exports = ControllerPodcast;
 
@@ -54,6 +50,7 @@ ControllerPodcast.prototype.onStart = function() {
   self.addToBrowseSources();
 
   self.serviceName = "podcast";
+  podcast.init(this.context, this.config);
 
   return libQ.resolve();
 };
@@ -219,166 +216,16 @@ ControllerPodcast.prototype.setUIConfig = function(data)
 };
 
 // Podcast Methods -----------------------------------------------------
-ControllerPodcast.prototype.fetchRssUrl = function(url) {
-  var self=this;
-
-  var request = {
-    type: 'GET',
-    url: url,
-    dataType: 'text',
-    headers: {
-      'Accept': '*/*',
-      'User-Agent': 'Mozilla/5.0'
-    },
-    timeoutMs: 5000
-  };
-  const headers = request.headers || {};
-  const fetchRequest = {
-    headers,
-    method: request.type,
-    credentials: 'same-origin'
-  };
-  let contentType = request.contentType;
-  if (contentType) {
-    headers['Content-Type'] = contentType;
-  }
-
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(reject, request.timeoutMs);
-    var options = fetchRequest || {};
-    options.credentials = 'same-origin';
-
-    fetch(request.url, options).then(
-      (response) => {
-        clearTimeout(timeout);
-        return response;
-      },
-      (error) => {
-        clearTimeout(timeout);
-        self.logger.info("ControllerPodcast::fetchRssUrl:timed out: ["+
-              Date.now() + "] url=" + request.url+", error="+error);
-        reject();
-      }
-    )
-    .then((response) => response.text())
-    .then((fetchData) => {
-      const options = {
-        ignoreAttributes : false,
-        attributeNamePrefix: ""
-      };
-
-      const parser = new XMLParser(options);
-      var feed = parser.parse(fetchData);
-      resolve(feed);
-    })
-    .catch((error) => {
-      self.logger.info('ControllerPodcast::fetchRssUrl: [' +
-          Date.now() + '] ' + '[Podcast] Error: ' + error);
-      reject();
-    });
-  });
-}
-
-ControllerPodcast.prototype.checkAddPodcast = function(defer, rssUrl) {
-  var self=this;
-  var message;
-
-  var urlObj = urlModule.parse(rssUrl);
-  // exception handling for ssenhosting host url
-  try {
-    if (urlObj.hostname === "pod.ssenhosting.com") {
-      var pathValues = urlObj.pathname.substring(1).split("/");
-      if (pathValues.length === 2) {
-        pathValues[1] = pathValues[1].split(".").shift();
-      }
-      if (pathValues.length === 3) {
-        pathValues.splice(2, 1);
-      }
-      rssUrl = `${urlObj.protocol}//${urlObj.hostname}/${pathValues.join("/")}`
-    }
-  }
-  catch (error) {
-    self.logger.info('ControllerPodcast::checkAddPodcast:ssenhosting: [' +
-        Date.now() + '] ' + '[Podcast] Error: ' + error);
-    self.showMessageToast('error',
-        self.getPodcastI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
-    defer.reject();
-    return;
-  }
-
-  var findItem = self.podcasts.items.find( item => item.url === rssUrl);
-  if (findItem) {
-    self.showMessageToast('info', self.getPodcastI18nString('DUPLICATED_PODCAST'));
-    defer.resolve();
-    return;
-  }
-  self.showMessageToast('info', self.getPodcastI18nString('ADD_PODCAST_PROCESSING'));
-
-  self.fetchRssUrl(rssUrl)
-  .then((feed) => {
-    var imageUrl, podcastItem;
-
-    if ( feed.rss.channel.image && feed.rss.channel.image.url )
-      imageUrl = feed.rss.channel.image.url;
-    else if ( feed.rss.channel['itunes:image'] )
-      imageUrl = feed.rss.channel['itunes:image'].href;
-    else if ( feed.rss.channel.itunes && feed.rss.channel.itunes.image )
-      imageUrl = feed.rss.channel.itunes.image;
-
-    // check validation of image url
-    var validUrl;
-    try {
-      var checkUrl = new URL(imageUrl);
-      validUrl = checkUrl.protocol === "http:" || checkUrl.protocol === "https:"
-    }
-    catch (_) {
-      validUrl = false;
-    }
-    if (!validUrl)
-      imageUrl = '/albumart?sourceicon=music_service/podcast/default.jpg';
-
-    const feedTitle = feed.rss.channel.title;
-    podcastItem = {
-      id: Math.random().toString(36).substring(2, 10) +
-          Math.random().toString(36).substring(2, 10),
-      title: feedTitle,
-      url: rssUrl,
-      image: imageUrl
-    };
-
-    self.podcasts.items.push(podcastItem);
-    self.updatePodcastData = true;
-    self.hideSearchResult = true;
-    self.updatePodcastUIConfig();
-
-    message = self.getPodcastI18nString('ADD_PODCAST_COMPLETION');
-    message = message.replace('{0}', feedTitle);
-    self.showMessageToast('success', message);
-
-    defer.resolve();
-  })
-  .catch(error => {
-    self.logger.info('ControllerPodcast::checkAddPodcast: [' +
-        Date.now() + '] ' + '[Podcast] Error: ' + error);
-    self.showMessageToast('error',
-        self.getPodcastI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
-    defer.reject();
-  })
-};
 
 ControllerPodcast.prototype.addPodcast = function(data) {
   var self=this;
-  var defer = libQ.defer();
   var rssUrl = data['input_podcast'].trim();
 
   if (!rssUrl) {
     self.showMessageToast('error', self.getPodcastI18nString('MESSAGE_ERROR_INPUT_RSS_URL'));
-    defer.resolve();
-    return;
+    return libQ.resolve();
   }
-  self.checkAddPodcast(defer, rssUrl);
-
-  return defer.promise;
+  return podcast.checkAddPodcast(rssUrl);
 };
 
 ControllerPodcast.prototype.deletePodcast = function(data) {
@@ -448,82 +295,20 @@ ControllerPodcast.prototype.saveMaxEpisodeNumber = function(data) {
 };
 
 ControllerPodcast.prototype.searchPodcast = function(data) {
-  var self = this;
-  var defer = libQ.defer();
-  var searchPodcast = data['search_keyword'].trim();;
-
-  self.searchKeyword = searchPodcast;
-  if (!searchPodcast) {
-    self.showMessageToast('error', self.getPodcastI18nString('MESSAGE_ERROR_INPUT_KEYWORD'));
-    return libQ.resolve();
-  }
-
-  self.searchedPodcasts = [];
-  var message = self.getPodcastI18nString('SEARCHING_WAIT_PODCAST');
-  message = message.replace('{0}', self.selectedCountry.label);
-  self.showMessageToast('info', message);
-
-  var country = self.selectedCountry.value;
-  var query = {
-    term: searchPodcast.trim(),
-    country: country,
-    media: 'podcast',
-    lang: 'en_us',
-    limit: 30
-  };
-  const queryParam = querystring.stringify(query);
-  const options = {
-    headers: {
-      'Accept': '*/*',
-      'User-Agent': 'Mozilla/5.0'
-    },
-    method: 'GET'
-  };
-
-  fetch(`${podcastSearchApi}/${country}/search?${queryParam}`, options)
-  .then((response) => response.json())
-  .then((items) => {
-    if (!items || items.resultCount === 0) {
-      self.hideSearchResult = true;
-      self.showMessageToast('info', self.getPodcastI18nString('MESSAGE_NONE_SEARCH_RESULT_PODCAST'));
-    } else {
-      self.hideSearchResult = false;
-      items.results.some(function (entry, index) {
-        var item = {
-          title: entry.collectionName,
-          url: entry.feedUrl
-        }
-        self.searchedPodcasts.push(item);
-      });
-      self.showMessageToast('info', self.getPodcastI18nString('MESSAGE_SUCCESS_SEARCH_RESULT_PODCAST'));
-    };
-    self.updatePodcastUIConfig();
-    defer.resolve();
-  })
-  .catch(error => {
-    self.logger.info('ControllerPodcast::searchPodcast: [' +
-        Date.now() + '] ' + '[Podcast] Error: ' + error);
-    defer.resolve();
-    self.showMessageToast('error', self.getPodcastI18nString('SEARCH_PODCAST_ERROR'));
-  });
-
-  return defer.promise;
+  return podcast.searchPodcast(data);
 };
 
 ControllerPodcast.prototype.searchAddPodcast = function(data) {
   var self = this;
-  var defer = libQ.defer();
 
   self.searchKeyword = "";
   const rssUrl = data.search_result_podcast.url;
   if (!rssUrl) {
     self.showMessageToast('error', self.getPodcastI18nString('MESSAGE_INVALID_PODCAST_URL'));
-    defer.resolve();
-    return;
+    return libQ.resolve();
   }
 
-  self.checkAddPodcast(defer, rssUrl);
-  return defer.promise;
+  return podcast.checkAddPodcast(rssUrl);
 };
 
 ControllerPodcast.prototype.selectCountry = function(data) {
@@ -649,7 +434,7 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
     message = message.replace('{0}', targetPodcast.title);
     self.showMessageToast('info', message);
 
-    self.fetchRssUrl(targetPodcast.url)
+    podcast.fetchRssUrl(targetPodcast.url)
     .then((feed) => {
       response.navigation.lists[0].title = feed.rss.channel.title;
 
