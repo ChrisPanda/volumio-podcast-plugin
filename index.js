@@ -1,9 +1,12 @@
 'use strict';
 
+const path = require('path');
+global.podcastRoot = path.resolve(__dirname);
+
 const libQ = require('kew');
 const fs = require('fs-extra');
 const NodeCache = require('node-cache');
-const podcast = require('podcast');
+const podcast = require(podcastRoot + '/podcast');
 
 module.exports = ControllerPodcast;
 
@@ -50,7 +53,7 @@ ControllerPodcast.prototype.onStart = function() {
   self.addToBrowseSources();
 
   self.serviceName = "podcast";
-  podcast.init(this.context, this.config);
+  podcast.init(this, this.context, this.config);
 
   return libQ.resolve();
 };

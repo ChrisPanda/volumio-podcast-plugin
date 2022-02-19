@@ -14,7 +14,8 @@ class podcast {
         this.selectedCountry = {};
     }
 
-    init(pluginContext, pluginConfig) {
+    init(context, pluginContext, pluginConfig) {
+        this.context = context;
         this._pluginContext = pluginContext;
         this._pluginConfig = pluginConfig;
     }
@@ -28,10 +29,10 @@ class podcast {
     }
 
     getI18nString = function (key) {
-        if (this.i18nStrings[key] !== undefined)
-            return this._pluginContext.i18nStrings[key];
+        if (this.context.i18nStrings[key] !== undefined)
+            return this.context.i18nStrings[key];
         else
-            return this._pluginContext.i18nStringsDefaults[key];
+            return this.context.i18nStringsDefaults[key];
     };
 
     fetchRssUrl(url) {
@@ -119,7 +120,7 @@ class podcast {
             return;
         }
 
-        let findItem = this._pluginContext.podcasts.items.find( item => item.url === rssUrl);
+        let findItem = this.context.podcasts.items.find( item => item.url === rssUrl);
         if (findItem) {
             this.toast('info', this.getI18nString('DUPLICATED_PODCAST'));
             defer.resolve();
@@ -159,14 +160,14 @@ class podcast {
                     image: imageUrl
                 };
 
-                this._pluginContext.podcasts.items.push(podcastItem);
-                this._pluginContext.updatePodcastData = true;
-                this._pluginContext.hideSearchResult = true;
-                this._pluginContext.updatePodcastUIConfig();
+                this.context.podcasts.items.push(podcastItem);
+                this.context.updatePodcastData = true;
+                this.context.hideSearchResult = true;
+                this.context.updatePodcastUIConfig();
 
                 message = this.getI18nString('ADD_PODCAST_COMPLETION');
                 message = message.replace('{0}', feedTitle);
-                this._pluginContext.toast('success', message);
+                this.toast('success', message);
 
                 defer.resolve();
             })
@@ -217,10 +218,10 @@ class podcast {
             .then((response) => response.json())
             .then((items) => {
                 if (!items || items.resultCount === 0) {
-                    this._pluginContext.hideSearchResult = true;
+                    this.context.hideSearchResult = true;
                     this.toast('info', this.getI18nString('MESSAGE_NONE_SEARCH_RESULT_PODCAST'));
                 } else {
-                    this._pluginContext.hideSearchResult = false;
+                    this.context.hideSearchResult = false;
                     items.results.some(function (entry, index) {
                         let item = {
                             title: entry.collectionName,
@@ -230,7 +231,7 @@ class podcast {
                     });
                     this.toast('info', this.getI18nString('MESSAGE_SUCCESS_SEARCH_RESULT_PODCAST'));
                 };
-                this._pluginContext.updatePodcastUIConfig();
+                this.context.updatePodcastUIConfig();
                 defer.resolve();
             })
             .catch(error => {
