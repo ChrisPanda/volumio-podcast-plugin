@@ -9,9 +9,9 @@ const querystring = require("querystring");
 const fetch = require('node-fetch');
 const {XMLParser} = require('fast-xml-parser');
 const fs = require('fs-extra');
-const podcastData = require(podcastRoot + 'podcast-data');
+const podcastData = require(podcastRoot + '/podcast-data');
 
-class podcast extends podcastData {
+class podcastCore extends podcastData {
     constructor() {
         super();
 
@@ -322,4 +322,4 @@ class podcast extends podcastData {
     }
 }
 
-module.exports = podcast;
+module.exports = podcastCore;

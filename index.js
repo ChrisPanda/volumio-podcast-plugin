@@ -5,7 +5,7 @@ global.podcastRoot = path.resolve(__dirname);
 
 const libQ = require('kew');
 const fs = require('fs-extra');
-const podcast = require(podcastRoot + '/podcast');
+const podcastCore = require(podcastRoot + '/podcast');
 const podcastBrowseUi = require(podcastRoot + '/podcast-browse-ui');
 const podcastSetupUi = require(podcastRoot + '/podcast-setup-ui');
 
@@ -51,15 +51,13 @@ ControllerPodcast.prototype.onStart = function() {
   var self = this;
 
   self.mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service','mpd');
-
-  self.addToBrowseSources();
-
   self.serviceName = "podcast";
-  this.podcastCore = new podcast();
+  this.podcastCore = new podcastCore();
   this.podcastCore.init(this);
   this.podcastBrowseUi = new podcastBrowseUi(this);
   this.podcastSetupUi = new podcastSetupUi(this);
 
+  self.addToBrowseSources();
   return libQ.resolve();
 };
 
@@ -160,7 +158,7 @@ ControllerPodcast.prototype.searchAddPodcast = function(data) {
   this.podcastCore.searchKeyword = "";
   const rssUrl = data.search_result_podcast.url;
   if (!rssUrl) {
-    this.podcastCore.toast('error', podcast.getI18nString('MESSAGE_INVALID_PODCAST_URL'));
+    this.podcastCore.toast('error', this.podcastCore.getI18nString('MESSAGE_INVALID_PODCAST_URL'));
     return libQ.resolve();
   }
 
@@ -482,7 +480,7 @@ ControllerPodcast.prototype.seek = function (position) {
 ControllerPodcast.prototype.stop = function() {
   var self = this;
 
-  podcast.toast('info', podcast.getI18nString('STOP_PODCAST'));
+  podcast.toast('info', this.podcastCore.getI18nString('STOP_PODCAST'));
 
   return self.mpdPlugin.stop().then(function () {
     return self.getState().then(function (state) {

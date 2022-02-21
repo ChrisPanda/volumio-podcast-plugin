@@ -41,6 +41,9 @@ class podcastData {
   get i18nCountry() {
     return this.i18nCountry;
   }
+  get i18nStrings() {
+    return this.i18nStrings;
+  }
   get hideSearchResult() {
     return this.hideSearchResult;
   }
