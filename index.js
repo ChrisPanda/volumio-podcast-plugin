@@ -16,8 +16,8 @@ function ControllerPodcast(context) {
 
   self.context = context;
   self.commandRouter = this.context.coreCommand;
-  self.logger = this.context.logger;
   self.configManager = this.context.configManager;
+  self.logger = this.context.logger;
   /*
     self.i18nCountry = {};
     self.i18nStrings = {};
@@ -52,12 +52,13 @@ ControllerPodcast.prototype.onStart = function() {
 
   self.mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service','mpd');
 
-  //self.loadPodcastI18nStrings();
   self.addToBrowseSources();
 
   self.serviceName = "podcast";
-  podcast.init(this);
-  podcastBrowseUi.init(this);
+  this.podcastCore = new podcast();
+  this.podcastCore.init(this);
+  this.podcastBrowseUi = new podcastBrowseUi(this);
+  this.podcastSetupUi = new podcastSetupUi(this);
 
   return libQ.resolve();
 };
@@ -87,11 +88,11 @@ ControllerPodcast.prototype.setConf = function(conf) {
 };
 
 ControllerPodcast.prototype.getUIConfig = function() {
-  return podcastSetupUi.getPodcastUIConfig();
+  return this.podcastSetupUi.getPodcastUIConfig();
 };
 
 ControllerPodcast.prototype.updatePodcastUIConfig = function() {
-  podcastSetupUi.updatePodcastUIConfig();
+  this.podcastSetupUi.updatePodcastUIConfig();
 };
 
 ControllerPodcast.prototype.setUIConfig = function(data)
@@ -106,7 +107,7 @@ ControllerPodcast.prototype.setUIConfig = function(data)
 ControllerPodcast.prototype.addPodcast = function(data) {
   var rssUrl = data['input_podcast'].trim();
 
-  return podcast.addPodcast(rssUrl);
+  return this.podcastCore.addPodcast(rssUrl);
 };
 
 ControllerPodcast.prototype.deletePodcast = function(data) {
@@ -114,20 +115,20 @@ ControllerPodcast.prototype.deletePodcast = function(data) {
   var id = data['list_podcast'].value;
   var title = data['list_podcast'].label;
 
-  var message = podcast.getI18nString('DELETE_CONFIRM_MESSAGE');
+  var message = this.podcastCore.getI18nString('DELETE_CONFIRM_MESSAGE');
   message = message.replace('{0}', title);
 
   var modalData = {
-    title: podcast.getI18nString('PLUGIN_NAME'),
+    title: this.podcastCore.getI18nString('PLUGIN_NAME'),
     message: message,
     size: 'md',
     buttons: [
       {
-        name: podcast.getI18nString('CANCEL'),
+        name: this.podcastCore.getI18nString('CANCEL'),
         class: 'btn btn-info'
       },
       {
-        name: podcast.getI18nString('CONFIRM'),
+        name: this.podcastCore.getI18nString('CONFIRM'),
         class: 'btn btn-primary',
         emit:'callMethod',
         payload:{'endpoint':'music_service/podcast','method':'deletePodcastConfirm','data': [id, title]}
@@ -140,40 +141,40 @@ ControllerPodcast.prototype.deletePodcast = function(data) {
 
 ControllerPodcast.prototype.deletePodcastConfirm = function(data) {
 
-  return podcast.deletePodcast(data[0], data[1]);
+  return this.podcastCore.deletePodcast(data[0], data[1]);
 };
 
 ControllerPodcast.prototype.saveMaxEpisodeNumber = function(data) {
 
   const maxNum = data.max_episode[0];
-  podcast.writePodcastMaxEpisodeCount(maxNum);
+  this.podcastCore.writePodcastMaxEpisodeCount(maxNum);
 };
 
 ControllerPodcast.prototype.searchPodcast = function(data) {
-  return podcast.searchPodcast(data);
+  return this.podcastCore.searchPodcast(data);
 };
 
 ControllerPodcast.prototype.searchAddPodcast = function(data) {
   var self = this;
 
-  podcast.setSearchKeyword("");
+  this.podcastCore.searchKeyword = "";
   const rssUrl = data.search_result_podcast.url;
   if (!rssUrl) {
-    podcast.toast('error', podcast.getI18nString('MESSAGE_INVALID_PODCAST_URL'));
+    this.podcastCore.toast('error', podcast.getI18nString('MESSAGE_INVALID_PODCAST_URL'));
     return libQ.resolve();
   }
 
-  return podcast.checkAddPodcast(rssUrl);
+  return this.podcastCore.checkAddPodcast(rssUrl);
 };
 
 ControllerPodcast.prototype.selectCountry = function(data) {
   var self = this;
 
   const selectedCountry = data['country_code'];
-  podcast.setSelectedCountry(selectedCountry);
-  var message = podcast.getI18nString('CHANGED_SEARCH_REGION');
+  this.podcastCore.selectedCountry = selectedCountry;
+  var message = this.podcastCore.getI18nString('CHANGED_SEARCH_REGION');
   message = message.replace('{0}', selectedCountry.label);
-  podcast.toast('info', message);
+  this.podcastCore.toast('info', message);
 
   self.updatePodcastUIConfig();
 
@@ -185,7 +186,7 @@ ControllerPodcast.prototype.addToBrowseSources = function () {
   var self = this;
 
   self.commandRouter.volumioAddToBrowseSources({
-    name: podcast.getI18nString('PLUGIN_NAME'),
+    name: this.podcastCore.getI18nString('PLUGIN_NAME'),
     uri: 'podcast',
     plugin_type: 'music_service',
     plugin_name: "podcast",
@@ -199,16 +200,16 @@ ControllerPodcast.prototype.handleBrowseUri = function (curUri) {
 
   if (curUri.startsWith('podcast')) {
     if (curUri === 'podcast') {
-      response = podcast.getRootContent();
+      response = this.podcastBrowseUi.getRootContent();
     }
     else {
-      response = podcast.getPodcastContent(curUri);
+      response = this.podcastBrowseUi.getPodcastContent(curUri);
     }
   }
 
   return response
       .fail(function (e) {
-        self.logger.info('ControllerPodcast::handleBrowseUri: [' + Date.now() + '] ' + '[podcast] handleBrowseUri failed');
+        self.logger.info('ControllerPodcast::handleBrowseUri: response failed');
         libQ.reject(new Error());
       });
 };
@@ -367,14 +368,14 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
 
   const podcastId = uris[1];
   const podcastParam = uris[2];
-  const podcastItem = podcast.getPodcastsItems().find(item => item.id === podcastId);
+  const podcastItem = this.podcastCore.podcastItems.find(item => item.id === podcastId);
 
   const episode = JSON.parse(decodeURIComponent(podcastParam));
   response.push({
     service: self.serviceName,
     type: 'track',
     uri: uri,
-    trackType: podcast.getI18nString('PLUGIN_NAME'),
+    trackType: this.podcastCore.getI18nString('PLUGIN_NAME'),
     name: episode.title,
     albumart: episode.albumart
       ? episode.albumart

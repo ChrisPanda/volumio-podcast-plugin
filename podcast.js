@@ -9,7 +9,6 @@ const querystring = require("querystring");
 const fetch = require('node-fetch');
 const {XMLParser} = require('fast-xml-parser');
 const fs = require('fs-extra');
-const podcastUI = require(podcastRoot + '/podcast-ui');
 const podcastData = require(podcastRoot + 'podcast-data');
 
 class podcast extends podcastData {
@@ -17,6 +16,7 @@ class podcast extends podcastData {
         super();
 
         this.podcastSearchApi = 'https://itunes.apple.com';
+        /*
         this.searchedPodcasts = [];
         this.searchKeyword = "";
         this.selectedCountry = {};
@@ -26,8 +26,7 @@ class podcast extends podcastData {
         this.i18nCountry = {};
         this.i18nStrings = {};
         this.i18nStringsDefaults = {};
-
-        //this.podcastData = new podcastData();
+*/
     }
 
     init(context) {
@@ -51,35 +50,6 @@ class podcast extends podcastData {
         else
             return this.i18nStringsDefaults[key];
     };
-
-    getPodcastsItems() {
-        return this.podcasts.items;
-    }
-    getSearchedPodcasts() {
-        return this.searchedPodcasts;
-    }
-    getMaxEpisodesCount() {
-        return this.podcasts.maxEpisode;
-    }
-    getSelectedCountry() {
-        return this.selectedCountry;
-    }
-    getSearchResultStatus() {
-        return this.hideSearchResult;
-    }
-    getSearchKeyword() {
-        return this.searchKeyword;
-    }
-
-    setSelectedCountry(country) {
-        this.selectedCountry = country;
-    }
-    setSearchKeyword(keyword) {
-        this.searchKeyword = keyword;
-    }
-    getI18nCountry() {
-        return this.i18nCountry;
-    }
 
     loadPodcastI18nStrings() {
         try {
@@ -178,7 +148,7 @@ class podcast extends podcastData {
             return;
         }
 
-        let findItem = this.podcasts.items.find( item => item.url === rssUrl);
+        let findItem = this.podcastItems.find( item => item.url === rssUrl);
         if (findItem) {
             this.toast('info', this.getI18nString('DUPLICATED_PODCAST'));
             defer.resolve();
@@ -219,7 +189,6 @@ class podcast extends podcastData {
                 };
 
                 this.podcastItems.push(podcastItem);
-                //this.podcasts.items.push(podcastItem);
                 this.updatePodcastData = true;
                 this.hideSearchResult = true;
                 this.context.updatePodcastUIConfig();
@@ -314,7 +283,7 @@ class podcast extends podcastData {
     deletePodcast(id, title) {
         let message, messageType;
 
-        const index = this.podcasts.items.map(item => item.id).indexOf(id);
+        const index = this.podcastItems.map(item => item.id).indexOf(id);
         if (index > -1) {
             this.podcasts.items.splice(index, 1);
 
@@ -335,17 +304,17 @@ class podcast extends podcastData {
 
     writePodcastItems() {
         if (this.updatePodcastData) {
-            podcastUI.deleteCache('root');
+            this.context.podcastBrowseUi.deleteCache('root');
             fs.writeJsonSync(__dirname+'/podcasts_list.json', this.podcasts);
             this.updatePodcastData = false;
         }
     }
 
     writePodcastMaxEpisodeCount(maxNum) {
-        this.podcasts.maxEpisode = maxNum;
+        this.maxEpisodesCount = maxNum;
         fs.writeJsonSync(__dirname+'/podcasts_list.json', this.podcasts);
 
-        podcastUI.deleteAllCache();
+        this.context.podcastBrowseUi.deleteAllCache();
 
         let message = this.getI18nString('CHANGED_MAX_EPISODE');
         message = message.replace('{0}', maxNum);
@@ -353,4 +322,4 @@ class podcast extends podcastData {
     }
 }
 
-module.exports = new podcast();
+module.exports = podcast;

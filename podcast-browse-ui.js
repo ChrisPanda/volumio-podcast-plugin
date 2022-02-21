@@ -1,14 +1,10 @@
 'use strict';
 
-const path = require('path');
-global.podcastRoot = path.resolve(__dirname);
-
 const libQ = require('kew');
-const podcast = require(podcastRoot + '/podcast');
 const NodeCache = require('node-cache');
 
 class podcastBrowseUi {
-    init(context) {
+    constructor(context) {
         this.context = context;
         this.cache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
     }
@@ -29,7 +25,7 @@ class podcastBrowseUi {
                 navigation: {
                     lists: [
                         {
-                            title: podcast.getI18nString('PLUGIN_NAME'),
+                            title: this.context.podcastCore.getI18nString('PLUGIN_NAME'),
                             icon: 'fa fa-podcast',
                             availableListViews: ["list", "grid"],
                             items: []
@@ -41,7 +37,7 @@ class podcastBrowseUi {
                 }
             };
 
-            podcast.getPodcastsItems().forEach(entry => {
+            this.context.podcastCore.podcastItems.forEach(entry => {
                 let imageUrl;
 
                 imageUrl = entry.image;
@@ -71,7 +67,7 @@ class podcastBrowseUi {
         let uris = uri.split('/');
 
         const podcastId = uris[1];
-        const targetPodcast = podcast.getPodcastsItems().find(item => item.id === podcastId);
+        const targetPodcast = this.context.podcastCore.podcastItems.find(item => item.id === podcastId);
         let podcastResponse = this.cache.get(targetPodcast.id);
         if (podcastResponse === undefined) {
             let response = {
@@ -91,11 +87,11 @@ class podcastBrowseUi {
                 }
             };
 
-            let message = podcast.getI18nString('WAIT_PODCAST_ITEMS');
+            let message = this.context.podcastCore.getI18nString('WAIT_PODCAST_ITEMS');
             message = message.replace('{0}', targetPodcast.title);
-            podcast.toast('info', message);
+            this.context.podcastCore.toast('info', message);
 
-            podcast.fetchRssUrl(targetPodcast.url)
+            this.context.podcastCore.fetchRssUrl(targetPodcast.url)
                 .then((feed) => {
                     response.navigation.lists[0].title = feed.rss.channel.title;
 
@@ -137,16 +133,16 @@ class podcastBrowseUi {
 
                             response.navigation.lists[0].items.push(podcastItem);
                         }
-                        return (index > podcast.getMaxEpisodesCount());  // limits podcast episodes
+                        return (index > this.context.podcastCore.maxEpisodesCount);  // limits podcast episodes
                     });
 
                     this.cache.set(targetPodcast.id, response);
                     defer.resolve(response);
                 })
                 .catch((error) => {
-                    podcast.logger.info('ControllerPodcast::getPodcastContent: error= ' + error);
-                    podcast.toast('error',targetPodcast.title +
-                        ": " + podcast.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
+                    this.context.logger.info('ControllerPodcast::getPodcastContent: error= ' + error);
+                    this.context.podcastCore.toast('error',targetPodcast.title +
+                        ": " + this.context.podcastCore.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
                     defer.reject();
                 })
         }
@@ -159,4 +155,4 @@ class podcastBrowseUi {
     };
 }
 
-module.exports = new podcastBrowseUi();
+module.exports = podcastBrowseUi;

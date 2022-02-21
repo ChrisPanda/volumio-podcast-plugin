@@ -20,6 +20,9 @@ class podcastData {
     this.i18nStringsDefaults = {};
   }
 
+  get podcasts() {
+    return this.podcasts;
+  }
   get podcastItems() {
     return this.podcasts.items;
   }
@@ -38,10 +41,16 @@ class podcastData {
   get i18nCountry() {
     return this.i18nCountry;
   }
-  get searchResultStatus() {
+  get hideSearchResult() {
     return this.hideSearchResult;
   }
+  get updatePodcastData() {
+    return this.updatePodcastData;
+  }
 
+  set podcasts(podcasts) {
+    this.podcasts = podcasts;
+  }
   set podcastItems(podcastItems) {
     this.podcasts.items = podcastItems
   }
@@ -60,8 +69,17 @@ class podcastData {
   set i18nCountry(i18nCountry) {
     this.i18nCountry = i18nCountry;
   }
-  set searchResultStatus(hideSearchResult) {
+  set i18nStrings(i18nStrings) {
+    this.i18nStrings = i18nStrings;
+  }
+  set i18nStringsDefaults(i18nStringsDefaults) {
+    this.i18nStringsDefaults = i18nStringsDefaults
+  }
+  set hideSearchResult(hideSearchResult) {
     this.hideSearchResult = hideSearchResult;
+  }
+  set updatePodcastData(updatePodcastData) {
+    this.updatePodcastData = updatePodcastData;
   }
 }
 
