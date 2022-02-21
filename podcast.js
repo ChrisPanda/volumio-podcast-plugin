@@ -10,9 +10,12 @@ const fetch = require('node-fetch');
 const {XMLParser} = require('fast-xml-parser');
 const fs = require('fs-extra');
 const podcastUI = require(podcastRoot + '/podcast-ui');
+const podcastData = require(podcastRoot + 'podcast-data');
 
-class podcast {
+class podcast extends podcastData {
     constructor() {
+        super();
+
         this.podcastSearchApi = 'https://itunes.apple.com';
         this.searchedPodcasts = [];
         this.searchKeyword = "";
@@ -23,6 +26,8 @@ class podcast {
         this.i18nCountry = {};
         this.i18nStrings = {};
         this.i18nStringsDefaults = {};
+
+        //this.podcastData = new podcastData();
     }
 
     init(context) {
@@ -213,7 +218,8 @@ class podcast {
                     image: imageUrl
                 };
 
-                this.podcasts.items.push(podcastItem);
+                this.podcastItems.push(podcastItem);
+                //this.podcasts.items.push(podcastItem);
                 this.updatePodcastData = true;
                 this.hideSearchResult = true;
                 this.context.updatePodcastUIConfig();
