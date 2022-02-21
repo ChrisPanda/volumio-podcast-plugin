@@ -1,10 +1,15 @@
 'use strict';
 
+const path = require('path');
+global.podcastRoot = path.resolve(__dirname);
+
 const libQ = require('kew');
 const urlModule = require('url');
 const querystring = require("querystring");
 const fetch = require('node-fetch');
 const {XMLParser} = require('fast-xml-parser');
+const fs = require('fs-extra');
+const podcastUI = require(podcastRoot + '/podcast-ui');
 
 class podcast {
     constructor() {
@@ -12,28 +17,76 @@ class podcast {
         this.searchedPodcasts = [];
         this.searchKeyword = "";
         this.selectedCountry = {};
+        this.hideSearchResult = true;
+        this.updatePodcastData = false;
+
+        this.i18nCountry = {};
+        this.i18nStrings = {};
+        this.i18nStringsDefaults = {};
     }
 
-    init(context, pluginContext, pluginConfig) {
+    init(context) {
         this.context = context;
-        this._pluginContext = pluginContext;
-        this._pluginConfig = pluginConfig;
+
+        this.loadPodcastI18nStrings();
+        this.podcasts = fs.readJsonSync(__dirname+'/podcasts_list.json');
     }
 
     logger() {
-        return this._pluginContext.logger;
+        return this.context.commandRouter.logger;
     }
 
     toast(type, message, title = this.getI18nString('PLUGIN_NAME')) {
-        this._pluginContext.coreCommand.pushToastMessage(type, title, message);
+        this.context.commandRouter.pushToastMessage(type, title, message);
     }
 
     getI18nString = function (key) {
-        if (this.context.i18nStrings[key] !== undefined)
-            return this.context.i18nStrings[key];
+        if (this.i18nStrings[key] !== undefined)
+            return this.i18nStrings[key];
         else
-            return this.context.i18nStringsDefaults[key];
+            return this.i18nStringsDefaults[key];
     };
+
+    getPodcastsItems() {
+        return this.podcasts.items;
+    }
+    getSearchedPodcasts() {
+        return this.searchedPodcasts;
+    }
+    getMaxEpisodesCount() {
+        return this.podcasts.maxEpisode;
+    }
+    getSelectedCountry() {
+        return this.selectedCountry;
+    }
+    getSearchResultStatus() {
+        return this.hideSearchResult;
+    }
+    getSearchKeyword() {
+        return this.searchKeyword;
+    }
+
+    setSelectedCountry(country) {
+        this.selectedCountry = country;
+    }
+    setSearchKeyword(keyword) {
+        this.searchKeyword = keyword;
+    }
+    getI18nCountry() {
+        return this.i18nCountry;
+    }
+
+    loadPodcastI18nStrings() {
+        try {
+            const language_code = this.context.commandRouter.sharedVars.get('language_code');
+            this.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_'+language_code+".json");
+        } catch(e) {
+            this.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
+        }
+
+        this.i18nCountry=fs.readJsonSync(__dirname+'/i18n/country_code.json');
+        this.i18nStringsDefaults=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
+    }
 
     fetchRssUrl(url) {
         let request = {
@@ -115,12 +168,12 @@ class podcast {
             this.logger.info('ControllerPodcast::checkAddPodcast:ssenhosting: [' +
                 Date.now() + '] ' + '[Podcast] Error: ' + error);
             this.toast('error',
-                this._pluginContext.getPodcastI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
+                this.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
             defer.reject();
             return;
         }
 
-        let findItem = this.context.podcasts.items.find( item => item.url === rssUrl);
+        let findItem = this.podcasts.items.find( item => item.url === rssUrl);
         if (findItem) {
             this.toast('info', this.getI18nString('DUPLICATED_PODCAST'));
             defer.resolve();
@@ -160,9 +213,9 @@ class podcast {
                     image: imageUrl
                 };
 
-                this.context.podcasts.items.push(podcastItem);
-                this.context.updatePodcastData = true;
-                this.context.hideSearchResult = true;
+                this.podcasts.items.push(podcastItem);
+                this.updatePodcastData = true;
+                this.hideSearchResult = true;
                 this.context.updatePodcastUIConfig();
 
                 message = this.getI18nString('ADD_PODCAST_COMPLETION');
@@ -218,10 +271,10 @@ class podcast {
             .then((response) => response.json())
             .then((items) => {
                 if (!items || items.resultCount === 0) {
-                    this.context.hideSearchResult = true;
+                    this.hideSearchResult = true;
                     this.toast('info', this.getI18nString('MESSAGE_NONE_SEARCH_RESULT_PODCAST'));
                 } else {
-                    this.context.hideSearchResult = false;
+                    this.hideSearchResult = false;
                     items.results.some(function (entry, index) {
                         let item = {
                             title: entry.collectionName,
@@ -243,6 +296,55 @@ class podcast {
 
         return defer.promise;
     };
+
+    addPodcast(rssUrl) {
+        if (!rssUrl) {
+            this.toast('error', this.getI18nString('MESSAGE_ERROR_INPUT_RSS_URL'));
+            return libQ.resolve();
+        }
+        return this.checkAddPodcast(rssUrl);
+    };
+
+    deletePodcast(id, title) {
+        let message, messageType;
+
+        const index = this.podcasts.items.map(item => item.id).indexOf(id);
+        if (index > -1) {
+            this.podcasts.items.splice(index, 1);
+
+            this.updatePodcastData = true;
+            this.hideSearchResult = true;
+            this.context.updatePodcastUIConfig();
+            message = this.getI18nString('DELETE_PODCAST_COMPLETION');
+            messageType = 'success';
+        }
+        else {
+            message = this.getI18nString('DELETE_PODCAST_ERROR');
+            messageType = 'error';
+        }
+        message = message.replace('{0}', title);
+        this.toast(messageType, message);
+        return libQ.resolve();
+    };
+
+    writePodcastItems() {
+        if (this.updatePodcastData) {
+            podcastUI.deleteCache('root');
+            fs.writeJsonSync(__dirname+'/podcasts_list.json', this.podcasts);
+            this.updatePodcastData = false;
+        }
+    }
+
+    writePodcastMaxEpisodeCount(maxNum) {
+        this.podcasts.maxEpisode = maxNum;
+        fs.writeJsonSync(__dirname+'/podcasts_list.json', this.podcasts);
+
+        podcastUI.deleteAllCache();
+
+        let message = this.getI18nString('CHANGED_MAX_EPISODE');
+        message = message.replace('{0}', maxNum);
+        this.toast('info', message);
+    }
 }
 
 module.exports = new podcast();

@@ -5,8 +5,9 @@ global.podcastRoot = path.resolve(__dirname);
 
 const libQ = require('kew');
 const fs = require('fs-extra');
-const NodeCache = require('node-cache');
 const podcast = require(podcastRoot + '/podcast');
+const podcastBrowseUi = require(podcastRoot + '/podcast-browse-ui');
+const podcastSetupUi = require(podcastRoot + '/podcast-setup-ui');
 
 module.exports = ControllerPodcast;
 
@@ -17,15 +18,18 @@ function ControllerPodcast(context) {
   self.commandRouter = this.context.coreCommand;
   self.logger = this.context.logger;
   self.configManager = this.context.configManager;
-  self.searchKeyword = "";
-  self.i18nStrings = {};
-  self.i18nStringsDefaults = {};
-  self.i18nCountry = {};
-  self.hideSearchResult = true;
-  self.updatePodcastData = false;
-  self.selectedCountry = {}
-  self.cache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
+  /*
+    self.i18nCountry = {};
+    self.i18nStrings = {};
+    self.i18nStringsDefaults = {};
 
+    self.searchKeyword = "";
+
+    self.hideSearchResult = true;
+    self.updatePodcastData = false;
+    self.selectedCountry = {}
+    self.cache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
+  */
   self.logger.info("ControllerPodcast::constructor");
 }
 
@@ -48,24 +52,22 @@ ControllerPodcast.prototype.onStart = function() {
 
   self.mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service','mpd');
 
-  self.loadPodcastI18nStrings();
-  self.loadPodcastsResource();
+  //self.loadPodcastI18nStrings();
   self.addToBrowseSources();
 
   self.serviceName = "podcast";
-  podcast.init(this, this.context, this.config);
+  podcast.init(this);
+  podcastBrowseUi.init(this);
 
   return libQ.resolve();
 };
 
 ControllerPodcast.prototype.onStop = function() {
-  var self = this;
 
   return libQ.resolve();
 };
 
 ControllerPodcast.prototype.onRestart = function() {
-  var self = this;
 
   return libQ.resolve();
 };
@@ -85,130 +87,11 @@ ControllerPodcast.prototype.setConf = function(conf) {
 };
 
 ControllerPodcast.prototype.getUIConfig = function() {
-  var self = this;
-  var defer = libQ.defer();
-  var lang_code = self.commandRouter.sharedVars.get('language_code');
-
-  self.getConf(this.configFile);
-  self.commandRouter.i18nJson(__dirname+'/i18n/strings_' + lang_code + '.json',
-      __dirname + '/i18n/strings_en.json',
-      __dirname + '/UIConfig.json')
-  .then(function(uiconf)
-  {
-    // setup user selected podcast list
-    self.podcasts.items.forEach(function (entry) {
-      var podcastItem = {
-        label: entry.title,
-        value: entry.id
-      };
-      uiconf.sections[3].content[0].options.push(podcastItem);
-    });
-    uiconf.sections[3].content[0].value = uiconf.sections[3].content[0].options[0];
-
-    // setup podcast search region list
-    for (var entry in self.i18nCountry) {
-      var countryItem = {
-        label: self.i18nCountry[entry].country_name,
-        value: self.i18nCountry[entry].country_code,
-        langCode: self.i18nCountry[entry].language_code
-      };
-
-      uiconf.sections[0].content[0].options.push(countryItem);
-    };
-
-    var foundRegions = uiconf.sections[0].content[0].options.find(item => item.langCode === lang_code);
-    if (foundRegions) {
-      uiconf.sections[0].content[0].value = foundRegions;
-      self.selectedCountry = foundRegions;
-    }
-    else {
-      uiconf.sections[0].content[0].value = uiconf.sections[0].content[0].options[0];
-      self.selectedCountry = uiconf.sections[0].content[0].options[0];
-    }
-
-    // setup max episode number
-    var maxEpisodeConfig = uiconf.sections[5].content[0].config;
-    maxEpisodeConfig.bars[0].value = self.podcasts.maxEpisode;
-    uiconf.sections[5].content[0].value = maxEpisodeConfig.value;
-
-    defer.resolve(uiconf);
-  })
-  .fail(function()
-  {
-    defer.reject(new Error());
-  });
-
-  return defer.promise;
+  return podcastSetupUi.getPodcastUIConfig();
 };
 
 ControllerPodcast.prototype.updatePodcastUIConfig = function() {
-  var self=this;
-
-  var lang_code = self.commandRouter.sharedVars.get('language_code');
-  self.commandRouter.i18nJson(__dirname+'/i18n/strings_' + lang_code + '.json',
-      __dirname + '/i18n/strings_en.json',
-      __dirname + '/UIConfig.json')
-  .then(function(uiconf)
-  {
-    // setup search regions
-    for (var entry in self.i18nCountry) {
-      self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
-        label: self.i18nCountry[entry].country_name,
-        value: self.i18nCountry[entry].country_code
-      });
-    };
-    self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value', self.selectedCountry);
-
-    // setup podcast search result section
-    if (!self.hideSearchResult) {
-      self.searchedPodcasts.forEach(function (entry) {
-        self.configManager.pushUIConfigParam(uiconf,
-            'sections[1].content[0].options', {
-              label: entry.title,
-              value: entry.title,
-              url: entry.url
-            });
-      });
-      self.configManager.setUIConfigParam(uiconf,
-          'sections[1].content[0].value', {
-            label: self.searchedPodcasts[0].title,
-            value: self.searchedPodcasts[0].title,
-            url: self.searchedPodcasts[0].url
-          });
-    }
-    self.configManager.setUIConfigParam(uiconf, 'sections[1].hidden', self.hideSearchResult);
-
-    // setup search keyword value
-    self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', self.searchKeyword);
-
-    // setup selected podcast items
-    self.podcasts.items.forEach(function (entry) {
-      self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
-        label: entry.title,
-        value: entry.id
-      });
-    });
-    self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value', {
-      value: self.podcasts.items[0].title,
-      label: self.podcasts.items[0].title
-    });
-
-    // setup max episode number
-    var maxEpisodeConfig = uiconf.sections[5].content[0].config;
-    maxEpisodeConfig.bars[0].value = self.podcasts.maxEpisode;
-    self.configManager.setUIConfigParam(uiconf, 'sections[5].content[0].config', maxEpisodeConfig);
-
-    if (self.updatePodcastData) {
-      self.cache.del('root');
-      fs.writeJsonSync(__dirname+'/podcasts_list.json', self.podcasts);
-      self.updatePodcastData = false;
-    }
-    self.commandRouter.broadcastMessage('pushUiConfig', uiconf);
-  })
-  .fail(function()
-  {
-    new Error();
-  });
+  podcastSetupUi.updatePodcastUIConfig();
 };
 
 ControllerPodcast.prototype.setUIConfig = function(data)
@@ -221,14 +104,9 @@ ControllerPodcast.prototype.setUIConfig = function(data)
 // Podcast Methods -----------------------------------------------------
 
 ControllerPodcast.prototype.addPodcast = function(data) {
-  var self=this;
   var rssUrl = data['input_podcast'].trim();
 
-  if (!rssUrl) {
-    self.showMessageToast('error', self.getPodcastI18nString('MESSAGE_ERROR_INPUT_RSS_URL'));
-    return libQ.resolve();
-  }
-  return podcast.checkAddPodcast(rssUrl);
+  return podcast.addPodcast(rssUrl);
 };
 
 ControllerPodcast.prototype.deletePodcast = function(data) {
@@ -236,20 +114,20 @@ ControllerPodcast.prototype.deletePodcast = function(data) {
   var id = data['list_podcast'].value;
   var title = data['list_podcast'].label;
 
-  var message = self.getPodcastI18nString('DELETE_CONFIRM_MESSAGE');
+  var message = podcast.getI18nString('DELETE_CONFIRM_MESSAGE');
   message = message.replace('{0}', title);
 
   var modalData = {
-    title: self.getPodcastI18nString('PLUGIN_NAME'),
+    title: podcast.getI18nString('PLUGIN_NAME'),
     message: message,
     size: 'md',
     buttons: [
       {
-        name: self.getPodcastI18nString('CANCEL'),
+        name: podcast.getI18nString('CANCEL'),
         class: 'btn btn-info'
       },
       {
-        name: self.getPodcastI18nString('CONFIRM'),
+        name: podcast.getI18nString('CONFIRM'),
         class: 'btn btn-primary',
         emit:'callMethod',
         payload:{'endpoint':'music_service/podcast','method':'deletePodcastConfirm','data': [id, title]}
@@ -261,40 +139,14 @@ ControllerPodcast.prototype.deletePodcast = function(data) {
 };
 
 ControllerPodcast.prototype.deletePodcastConfirm = function(data) {
-  var self = this;
-  var message, messageType;
 
-  const index = self.podcasts.items.map(item => item.id).indexOf(data[0]);
-  if (index > -1) {
-    self.podcasts.items.splice(index, 1);
-
-    self.updatePodcastData = true;
-    self.hideSearchResult = true;
-    self.updatePodcastUIConfig();
-    message = self.getPodcastI18nString('DELETE_PODCAST_COMPLETION');
-    messageType = 'success';
-  }
-  else {
-    message = self.getPodcastI18nString('DELETE_PODCAST_ERROR');
-    messageType = 'error';
-  }
-  message = message.replace('{0}', data[1]);
-  self.showMessageToast(messageType, message);
-  return libQ.resolve();
+  return podcast.deletePodcast(data[0], data[1]);
 };
 
 ControllerPodcast.prototype.saveMaxEpisodeNumber = function(data) {
-  var self = this;
 
   const maxNum = data.max_episode[0];
-  self.podcasts.maxEpisode = maxNum;
-  fs.writeJsonSync(__dirname+'/podcasts_list.json', self.podcasts);
-
-  self.cache.flushAll();
-
-  var message = self.getPodcastI18nString('CHANGED_MAX_EPISODE');
-  message = message.replace('{0}', maxNum);
-  self.showMessageToast('info', message);
+  podcast.writePodcastMaxEpisodeCount(maxNum);
 };
 
 ControllerPodcast.prototype.searchPodcast = function(data) {
@@ -304,10 +156,10 @@ ControllerPodcast.prototype.searchPodcast = function(data) {
 ControllerPodcast.prototype.searchAddPodcast = function(data) {
   var self = this;
 
-  self.searchKeyword = "";
+  podcast.setSearchKeyword("");
   const rssUrl = data.search_result_podcast.url;
   if (!rssUrl) {
-    self.showMessageToast('error', self.getPodcastI18nString('MESSAGE_INVALID_PODCAST_URL'));
+    podcast.toast('error', podcast.getI18nString('MESSAGE_INVALID_PODCAST_URL'));
     return libQ.resolve();
   }
 
@@ -317,10 +169,11 @@ ControllerPodcast.prototype.searchAddPodcast = function(data) {
 ControllerPodcast.prototype.selectCountry = function(data) {
   var self = this;
 
-  self.selectedCountry = data['country_code'];
-  var message = self.getPodcastI18nString('CHANGED_SEARCH_REGION');
-  message = message.replace('{0}', self.selectedCountry.label);
-  self.showMessageToast('info', message);
+  const selectedCountry = data['country_code'];
+  podcast.setSelectedCountry(selectedCountry);
+  var message = podcast.getI18nString('CHANGED_SEARCH_REGION');
+  message = message.replace('{0}', selectedCountry.label);
+  podcast.toast('info', message);
 
   self.updatePodcastUIConfig();
 
@@ -332,7 +185,7 @@ ControllerPodcast.prototype.addToBrowseSources = function () {
   var self = this;
 
   self.commandRouter.volumioAddToBrowseSources({
-    name: self.getPodcastI18nString('PLUGIN_NAME'),
+    name: podcast.getI18nString('PLUGIN_NAME'),
     uri: 'podcast',
     plugin_type: 'music_service',
     plugin_name: "podcast",
@@ -346,10 +199,10 @@ ControllerPodcast.prototype.handleBrowseUri = function (curUri) {
 
   if (curUri.startsWith('podcast')) {
     if (curUri === 'podcast') {
-      response = self.getRootContent();
+      response = podcast.getRootContent();
     }
     else {
-      response = self.getPodcastContent(curUri);
+      response = podcast.getPodcastContent(curUri);
     }
   }
 
@@ -360,6 +213,7 @@ ControllerPodcast.prototype.handleBrowseUri = function (curUri) {
       });
 };
 
+/*
 ControllerPodcast.prototype.getRootContent = function() {
   var self = this;
   var response;
@@ -499,6 +353,7 @@ ControllerPodcast.prototype.getPodcastContent = function(uri) {
 
   return defer.promise;
 };
+*/
 
 ControllerPodcast.prototype.explodeUri = function (uri) {
   var self = this;
@@ -512,14 +367,14 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
 
   const podcastId = uris[1];
   const podcastParam = uris[2];
-  const podcastItem = self.podcasts.items.find(item => item.id === podcastId);
+  const podcastItem = podcast.getPodcastsItems().find(item => item.id === podcastId);
 
   const episode = JSON.parse(decodeURIComponent(podcastParam));
   response.push({
     service: self.serviceName,
     type: 'track',
     uri: uri,
-    trackType: self.getPodcastI18nString('PLUGIN_NAME'),
+    trackType: podcast.getI18nString('PLUGIN_NAME'),
     name: episode.title,
     albumart: episode.albumart
       ? episode.albumart
@@ -626,7 +481,7 @@ ControllerPodcast.prototype.seek = function (position) {
 ControllerPodcast.prototype.stop = function() {
   var self = this;
 
-  self.showMessageToast('info', self.getPodcastI18nString('STOP_PODCAST'));
+  podcast.toast('info', podcast.getI18nString('STOP_PODCAST'));
 
   return self.mpdPlugin.stop().then(function () {
     return self.getState().then(function (state) {
@@ -653,62 +508,4 @@ ControllerPodcast.prototype.resume = function() {
       return self.pushState(state);
     });
   });
-};
-
-ControllerPodcast.prototype.showDialogMessage = function(message) {
-  var self = this;
-
-  var modalData = {
-    title: self.getPodcastI18nString('PLUGIN_NAME'),
-    message: message,
-    size: 'md',
-    buttons: [
-      {
-        name: self.getPodcastI18nString('CLOSE'),
-        class: 'btn btn-info'
-      }
-    ]
-  };
-  self.commandRouter.broadcastMessage("openModal", modalData);
-};
-
-ControllerPodcast.prototype.showMessageToast = function (type, message) {
-  var self=this;
-
-  self.commandRouter.pushToastMessage(
-      type,
-      self.getPodcastI18nString('PLUGIN_NAME'),
-      message
-  );
-};
-
-// resource functions for Podcast -----------------------------------
-ControllerPodcast.prototype.loadPodcastsResource = function() {
-  var self = this;
-
-  self.podcasts = fs.readJsonSync(__dirname+'/podcasts_list.json');
-  self.searchedPodcasts = null;
-};
-
-ControllerPodcast.prototype.loadPodcastI18nStrings = function () {
-  var self = this;
-
-  try {
-    var language_code = self.commandRouter.sharedVars.get('language_code');
-    self.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_'+language_code+".json");
-  } catch(e) {
-    self.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
-  }
-
-  self.i18nCountry=fs.readJsonSync(__dirname+'/i18n/country_code.json');
-  self.i18nStringsDefaults=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
-};
-
-ControllerPodcast.prototype.getPodcastI18nString = function (key) {
-  var self = this;
-
-  if (self.i18nStrings[key] !== undefined)
-    return self.i18nStrings[key];
-  else
-    return self.i18nStringsDefaults[key];
 };
