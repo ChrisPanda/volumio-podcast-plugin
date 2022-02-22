@@ -18,80 +18,80 @@ class podcastData {
   }
 
   get podcasts() {
-    return this.podcasts;
+    return this._podcasts;
   }
   set podcasts(podcasts) {
-    this.podcasts = podcasts;
+    this._podcasts = podcasts;
   }
 
   get podcastItems() {
-    return this.podcasts.items;
+    return this._podcasts.items;
   }
   set podcastItems(podcastItems) {
-    this.podcasts.items = podcastItems
+    this._podcasts.items = podcastItems
   }
 
   get maxEpisodesCount() {
-    return this.podcasts.maxEpisode;
+    return this._podcasts.maxEpisode;
   }
   set maxEpisodesCount(maxEpisodesCount){
-    this.podcasts.maxEpisode = maxEpisodesCount
+    this._podcasts.maxEpisode = maxEpisodesCount
   }
 
   get searchedPodcasts() {
-    return this.searchedPodcasts;
+    return this._searchedPodcasts;
   }
   set searchedPodcasts(searchedPodcasts) {
-    this.searchedPodcasts = searchedPodcasts
+    this._searchedPodcasts = searchedPodcasts
   }
 
   get selectedCountry() {
-    return this.selectedCountry;
+    return this._selectedCountry;
   }
   set selectedCountry(country) {
-    this.selectedCountry = country;
+    this._selectedCountry = country;
   }
 
   get searchKeyword() {
-    return this.searchKeyword;
+    return this._searchKeyword;
   }
   set searchKeyword(keyword) {
-    this.searchKeyword = keyword;
+    this._searchKeyword = keyword;
   }
 
   get i18nCountry() {
-    return this.i18nCountry;
+    return this._i18nCountry;
   }
   set i18nCountry(i18nCountry) {
-    this.i18nCountry = i18nCountry;
+    this._i18nCountry = i18nCountry;
   }
 
   get i18nStrings() {
-    return this.i18nStrings;
+    return this._i18nStrings;
   }
   set i18nStrings(i18nStrings) {
-    this.i18nStrings = i18nStrings;
+    this._i18nStrings = i18nStrings;
   }
 
   get i18nStringsDefaults() {
-    return this.i18nStringsDefaults;
+    return this._i18nStringsDefaults;
   }
   set i18nStringsDefaults(i18nStringsDefaults) {
-    this.i18nStringsDefaults = i18nStringsDefaults
+    this._i18nStringsDefaults = i18nStringsDefaults
   }
 
   get hideSearchResult() {
-    return this.hideSearchResult;
+    return this._hideSearchResult;
   }
   set hideSearchResult(hideSearchResult) {
-    this.hideSearchResult = hideSearchResult;
+    this._hideSearchResult = hideSearchResult;
   }
 
   get updatePodcastData() {
-    return this.updatePodcastData;
+    return this._updatePodcastData;
   }
   set updatePodcastData(updatePodcastData) {
-    this.updatePodcastData = updatePodcastData;
+    this._updatePodcastData = updatePodcastData;
   }
 }
 
