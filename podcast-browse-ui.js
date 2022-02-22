@@ -6,6 +6,7 @@ const NodeCache = require('node-cache');
 class podcastBrowseUi {
     constructor(context) {
         this.context = context;
+        this.podcastCore = context.podcastCore
         this.cache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
     }
 
@@ -25,7 +26,7 @@ class podcastBrowseUi {
                 navigation: {
                     lists: [
                         {
-                            title: this.context.podcastCore.getI18nString('PLUGIN_NAME'),
+                            title: this.podcastCore.getI18nString('PLUGIN_NAME'),
                             icon: 'fa fa-podcast',
                             availableListViews: ["list", "grid"],
                             items: []
@@ -37,7 +38,7 @@ class podcastBrowseUi {
                 }
             };
 
-            this.context.podcastCore.podcastItems.forEach(entry => {
+            this.podcastCore.podcastItems.forEach(entry => {
                 let imageUrl;
 
                 imageUrl = entry.image;
@@ -67,7 +68,7 @@ class podcastBrowseUi {
         let uris = uri.split('/');
 
         const podcastId = uris[1];
-        const targetPodcast = this.context.podcastCore.podcastItems.find(item => item.id === podcastId);
+        const targetPodcast = this.podcastCore.podcastItems.find(item => item.id === podcastId);
         let podcastResponse = this.cache.get(targetPodcast.id);
         if (podcastResponse === undefined) {
             let response = {
@@ -87,11 +88,11 @@ class podcastBrowseUi {
                 }
             };
 
-            let message = this.context.podcastCore.getI18nString('WAIT_PODCAST_ITEMS');
+            let message = this.podcastCore.getI18nString('WAIT_PODCAST_ITEMS');
             message = message.replace('{0}', targetPodcast.title);
-            this.context.podcastCore.toast('info', message);
+            this.podcastCore.toast('info', message);
 
-            this.context.podcastCore.fetchRssUrl(targetPodcast.url)
+            this.podcastCore.fetchRssUrl(targetPodcast.url)
                 .then((feed) => {
                     response.navigation.lists[0].title = feed.rss.channel.title;
 
@@ -133,7 +134,7 @@ class podcastBrowseUi {
 
                             response.navigation.lists[0].items.push(podcastItem);
                         }
-                        return (index > this.context.podcastCore.maxEpisodesCount);  // limits podcast episodes
+                        return (index > this.podcastCore.maxEpisodesCount);  // limits podcast episodes
                     });
 
                     this.cache.set(targetPodcast.id, response);
@@ -141,8 +142,8 @@ class podcastBrowseUi {
                 })
                 .catch((error) => {
                     this.context.logger.info('ControllerPodcast::getPodcastContent: error= ' + error);
-                    this.context.podcastCore.toast('error',targetPodcast.title +
-                        ": " + this.context.podcastCore.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
+                    this.podcastCore.toast('error',targetPodcast.title +
+                        ": " + this.podcastCore.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
                     defer.reject();
                 })
         }
@@ -153,6 +154,49 @@ class podcastBrowseUi {
 
         return defer.promise;
     };
+
+    constructListTitleWithLink(title, links, isFirstList) {
+        let html = `<div style="display: flex; width: 100%; align-items: flex-end;${isFirstList ? '' : ' margin-top: -24px;'}">
+                    <div>${title}</div>
+                    <div style="flex-grow: 1; text-align: right; font-size: small;">`;
+
+        if (Array.isArray(links)) {
+            links.forEach( (link, index) => {
+                html += this.constructLinkItem(link);
+                if (index < links.length - 1) {
+                    html += '<span style="padding: 0px 5px;">|</span>';
+                }
+            })
+        }
+        else {
+            html += this.constructLinkItem(links);
+        }
+
+        html += '</div></div>';
+
+        return html;
+    }
+
+    constructLinkItem(link) {
+        let html = '';
+        if (link.icon) {
+            if (link.icon.type === 'fa' && link.icon.float !== 'right') {
+                html += `<i class="${link.icon.class}" style="position: relative; top: 1px; margin-right: 2px; font-size: 16px;${ link.icon.color ? ' color: ' + link.icon.color + ';': ''}"></i>`;
+            }
+            else if (link.icon.type === 'podcast') {
+                html += `<img src="/albumart?sourceicon=${encodeURIComponent('music_service/podcast/assets/default.jpg')}" style="width: 32px; height: 32px; margin-right: 5px; margin-top: -1px;" />`;
+
+            }
+        }
+        html += `<a${link.target ? ' target="' + link.target + '"' : ''}${link.style ? ' style="' + link.style + '"' : ''} href="${link.url}"${link.onclick ? ' onclick="' + link.onclick + '"' : ''}>
+                    ${link.text}
+                </a>`;
+        if (link.icon && link.icon.type === 'fa' && link.icon.float === 'right') {
+            html += `<i class="${link.icon.class}" style="position: relative; top: 1px; margin-left: 2px; font-size: 16px;${ link.icon.color ? ' color: ' + link.icon.color + ';': ''}"></i>`;
+        }
+
+        return html;
+    }
 }
 
 module.exports = podcastBrowseUi;
