@@ -6,19 +6,22 @@ class podcastSetupUi {
 
     constructor(context) {
         this.context = context;
+        this.commandRouter = context.commandRouter
+        this.configManager = context.configManager
+        this.podcastCore = context.podcastCore
     }
 
     getPodcastUIConfig() {
         let defer = libQ.defer();
-        const lang_code = this.context.commandRouter.sharedVars.get('language_code');
+        const lang_code = this.commandRouter.sharedVars.get('language_code');
 
         this.context.getConf(this.context.configFile);
-        this.context.commandRouter.i18nJson(__dirname+'/i18n/strings_' + lang_code + '.json',
+        this.commandRouter.i18nJson(__dirname+'/i18n/strings_' + lang_code + '.json',
             __dirname + '/i18n/strings_en.json',
             __dirname + '/UIConfig.json')
             .then((uiconf) => {
                 // setup user selected podcast list
-                this.context.podcastCore.podcastItems.forEach(entry => {
+                this.podcastCore.podcastItems.forEach(entry => {
                     let podcastItem = {
                         label: entry.title,
                         value: entry.id
@@ -28,7 +31,7 @@ class podcastSetupUi {
                 uiconf.sections[3].content[0].value = uiconf.sections[3].content[0].options[0];
 
                 // setup podcast search region list
-                const i18nCountry = this.context.podcastCore.i18nCountry;
+                const i18nCountry = this.podcastCore.i18nCountry;
                 for (const entry in i18nCountry) {
                     let countryItem = {
                         label: i18nCountry[entry].country_name,
@@ -42,16 +45,16 @@ class podcastSetupUi {
                 const foundRegions = uiconf.sections[0].content[0].options.find(item => item.langCode === lang_code);
                 if (foundRegions) {
                     uiconf.sections[0].content[0].value = foundRegions;
-                    this.context.podcastCore.selectedCountry = foundRegions;
+                    this.podcastCore.selectedCountry = foundRegions;
                 }
                 else {
                     uiconf.sections[0].content[0].value = uiconf.sections[0].content[0].options[0];
-                    this.context.podcastCore.selectedCountry = uiconf.sections[0].content[0].options[0];
+                    this.podcastCore.selectedCountry = uiconf.sections[0].content[0].options[0];
                 }
 
                 // setup max episode number
                 const maxEpisodeConfig = uiconf.sections[5].content[0].config;
-                maxEpisodeConfig.bars[0].value = this.context.podcastCore.maxEpisodesCount;
+                maxEpisodeConfig.bars[0].value = this.podcastCore.maxEpisodesCount;
                 uiconf.sections[5].content[0].value = maxEpisodeConfig.value;
 
                 defer.resolve(uiconf);
@@ -65,64 +68,64 @@ class podcastSetupUi {
     }
 
     updatePodcastUIConfig() {
-        let lang_code = this.context.commandRouter.sharedVars.get('language_code');
-        this.context.commandRouter.i18nJson(__dirname+'/i18n/strings_' + lang_code + '.json',
+        let lang_code = this.commandRouter.sharedVars.get('language_code');
+        this.commandRouter.i18nJson(__dirname+'/i18n/strings_' + lang_code + '.json',
             __dirname + '/i18n/strings_en.json',
             __dirname + '/UIConfig.json')
             .then((uiconf) => {
                 // setup search regions
-                for (const entry in this.context.i18nCountry) {
-                    this.context.commandRouter.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
-                        label: this.context.i18nCountry[entry].country_name,
-                        value: this.context.i18nCountry[entry].country_code
+                for (const entry in this.podcastCore.i18nCountry) {
+                    this.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
+                        label: this.podcastCore.i18nCountry[entry].country_name,
+                        value: this.podcastCore.i18nCountry[entry].country_code
                     });
                 }
-                this.context.commandRouter.setUIConfigParam(uiconf, 'sections[0].content[0].value', this.podcastCore.selectedCountry);
+                this.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value', this.podcastCore.selectedCountry);
 
                 // setup podcast search result section
-                const hideSearchResult = this.context.podcastCore.hideSearchResult;
+                const hideSearchResult = this.podcastCore.hideSearchResult;
                 if (!hideSearchResult) {
-                    const searchedPodcasts = this.context.podcastCore.searchedPodcasts;
+                    const searchedPodcasts = this.podcastCore.searchedPodcasts;
                     searchedPodcasts.forEach(entry => {
-                        this.context.commandRouter.pushUIConfigParam(uiconf,
+                        this.configManager.pushUIConfigParam(uiconf,
                             'sections[1].content[0].options', {
                                 label: entry.title,
                                 value: entry.title,
                                 url: entry.url
                             });
                     });
-                    this.context.commandRouter.setUIConfigParam(uiconf,
+                    this.configManager.setUIConfigParam(uiconf,
                         'sections[1].content[0].value', {
                             label: searchedPodcasts[0].title,
                             value: searchedPodcasts[0].title,
                             url: searchedPodcasts[0].url
                         });
                 }
-                this.context.commandRouter.configManager.setUIConfigParam(uiconf, 'sections[1].hidden', hideSearchResult);
+                this.configManager.setUIConfigParam(uiconf, 'sections[1].hidden', hideSearchResult);
 
                 // setup search keyword value
-                this.context.commandRouter.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', this.context.podcastCore.searchKeyword);
+                this.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', this.podcastCore.searchKeyword);
 
-                const podcastsItems = this.context.podcastCore.podcastItems;
+                const podcastsItems = this.podcastCore.podcastItems;
                 // setup selected podcast items
                 podcastsItems.forEach(entry => {
-                    this.context.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
+                    this.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
                         label: entry.title,
                         value: entry.id
                     });
                 });
-                this.context.commandRouter.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value', {
+                this.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value', {
                     value: podcastsItems[0].title,
                     label: podcastsItems[0].title
                 });
 
                 // setup max episode number
                 let maxEpisodeConfig = uiconf.sections[5].content[0].config;
-                maxEpisodeConfig.bars[0].value = this.context.podcastCore.maxEpisodesCount;
-                this.context.configManager.setUIConfigParam(uiconf, 'sections[5].content[0].config', maxEpisodeConfig);
+                maxEpisodeConfig.bars[0].value = this.podcastCore.maxEpisodesCount;
+                this.configManager.setUIConfigParam(uiconf, 'sections[5].content[0].config', maxEpisodeConfig);
 
-                this.context.podcastCore.writePodcastItems();
-                this.context.commandRouter.broadcastMessage('pushUiConfig', uiconf);
+                this.podcastCore.writePodcastItems();
+                this.commandRouter.broadcastMessage('pushUiConfig', uiconf);
             })
             .fail(function()
             {
