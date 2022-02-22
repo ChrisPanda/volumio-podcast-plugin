@@ -14,19 +14,7 @@ const podcastData = require(podcastRoot + '/podcast-data');
 class podcastCore extends podcastData {
     constructor() {
         super();
-
         this.podcastSearchApi = 'https://itunes.apple.com';
-        /*
-        this.searchedPodcasts = [];
-        this.searchKeyword = "";
-        this.selectedCountry = {};
-        this.hideSearchResult = true;
-        this.updatePodcastData = false;
-
-        this.i18nCountry = {};
-        this.i18nStrings = {};
-        this.i18nStringsDefaults = {};
-*/
     }
 
     init(context) {

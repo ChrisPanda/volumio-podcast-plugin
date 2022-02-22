@@ -1,8 +1,5 @@
 'use strict';
 
-const path = require('path');
-global.podcastRoot = path.resolve(__dirname);
-
 class podcastData {
   constructor() {
     this.podcasts = {
@@ -23,63 +20,75 @@ class podcastData {
   get podcasts() {
     return this.podcasts;
   }
-  get podcastItems() {
-    return this.podcasts.items;
-  }
-  get maxEpisodesCount() {
-    return this.podcasts.maxEpisode;
-  }
-  get searchedPodcasts() {
-    return this.searchedPodcasts;
-  }
-  get selectedCountry() {
-    return this.selectedCountry;
-  }
-  get searchKeyword() {
-    return this.searchKeyword;
-  }
-  get i18nCountry() {
-    return this.i18nCountry;
-  }
-  get i18nStrings() {
-    return this.i18nStrings;
-  }
-  get hideSearchResult() {
-    return this.hideSearchResult;
-  }
-  get updatePodcastData() {
-    return this.updatePodcastData;
-  }
-
   set podcasts(podcasts) {
     this.podcasts = podcasts;
+  }
+
+  get podcastItems() {
+    return this.podcasts.items;
   }
   set podcastItems(podcastItems) {
     this.podcasts.items = podcastItems
   }
+
+  get maxEpisodesCount() {
+    return this.podcasts.maxEpisode;
+  }
   set maxEpisodesCount(maxEpisodesCount){
     this.podcasts.maxEpisode = maxEpisodesCount
+  }
+
+  get searchedPodcasts() {
+    return this.searchedPodcasts;
   }
   set searchedPodcasts(searchedPodcasts) {
     this.searchedPodcasts = searchedPodcasts
   }
+
+  get selectedCountry() {
+    return this.selectedCountry;
+  }
   set selectedCountry(country) {
     this.selectedCountry = country;
+  }
+
+  get searchKeyword() {
+    return this.searchKeyword;
   }
   set searchKeyword(keyword) {
     this.searchKeyword = keyword;
   }
+
+  get i18nCountry() {
+    return this.i18nCountry;
+  }
   set i18nCountry(i18nCountry) {
     this.i18nCountry = i18nCountry;
+  }
+
+  get i18nStrings() {
+    return this.i18nStrings;
   }
   set i18nStrings(i18nStrings) {
     this.i18nStrings = i18nStrings;
   }
+
+  get i18nStringsDefaults() {
+    return this.i18nStringsDefaults;
+  }
   set i18nStringsDefaults(i18nStringsDefaults) {
     this.i18nStringsDefaults = i18nStringsDefaults
   }
+
+  get hideSearchResult() {
+    return this.hideSearchResult;
+  }
   set hideSearchResult(hideSearchResult) {
     this.hideSearchResult = hideSearchResult;
+  }
+
+  get updatePodcastData() {
+    return this.updatePodcastData;
   }
   set updatePodcastData(updatePodcastData) {
     this.updatePodcastData = updatePodcastData;

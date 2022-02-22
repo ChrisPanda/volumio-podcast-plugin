@@ -18,18 +18,6 @@ function ControllerPodcast(context) {
   self.commandRouter = this.context.coreCommand;
   self.configManager = this.context.configManager;
   self.logger = this.context.logger;
-  /*
-    self.i18nCountry = {};
-    self.i18nStrings = {};
-    self.i18nStringsDefaults = {};
-
-    self.searchKeyword = "";
-
-    self.hideSearchResult = true;
-    self.updatePodcastData = false;
-    self.selectedCountry = {}
-    self.cache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
-  */
   self.logger.info("ControllerPodcast::constructor");
 }
 
