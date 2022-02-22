@@ -238,7 +238,7 @@ class podcastCore extends podcastData {
                     this.toast('info', this.getI18nString('MESSAGE_NONE_SEARCH_RESULT_PODCAST'));
                 } else {
                     this.hideSearchResult = false;
-                    items.results.some(function (entry, index) {
+                    items.results.some(entry => {
                         let item = {
                             title: entry.collectionName,
                             url: entry.feedUrl

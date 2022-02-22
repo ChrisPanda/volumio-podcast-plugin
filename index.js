@@ -39,7 +39,7 @@ ControllerPodcast.prototype.onStart = function() {
   var self = this;
 
   self.mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service','mpd');
-  self.serviceName = "podcast";
+  this.serviceName = "podcast";
   this.podcastCore = new podcastCore();
   this.podcastCore.init(this);
   this.podcastBrowseUi = new podcastBrowseUi(this);
@@ -468,7 +468,7 @@ ControllerPodcast.prototype.seek = function (position) {
 ControllerPodcast.prototype.stop = function() {
   var self = this;
 
-  podcast.toast('info', this.podcastCore.getI18nString('STOP_PODCAST'));
+  this.podcastCore.toast('info', this.podcastCore.getI18nString('STOP_PODCAST'));
 
   return self.mpdPlugin.stop().then(function () {
     return self.getState().then(function (state) {

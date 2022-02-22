@@ -104,7 +104,7 @@ class podcastBrowseUi {
                         feed.rss.channel.item.push(tempItem);
                     }
 
-                    feed.rss.channel.item.some(function (entry, index) {
+                    feed.rss.channel.item.some( (entry, index) => {
                         if (entry.enclosure && entry.enclosure.url) {
                             let imageUrl;
                             if ((entry.image !== undefined) && (entry.image.url !== undefined))

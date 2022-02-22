@@ -19,7 +19,7 @@ class podcastSetupUi {
             .then(function(uiconf)
             {
                 // setup user selected podcast list
-                this.context.podcastCore.podcastItems.forEach(function (entry) {
+                this.context.podcastCore.podcastItems.forEach(entry => {
                     let podcastItem = {
                         label: entry.title,
                         value: entry.id
