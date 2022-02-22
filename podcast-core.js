@@ -37,7 +37,7 @@ class podcastCore extends podcastData {
             return this.i18nStrings[key];
         else
             return this.i18nStringsDefaults[key];
-    };
+    }
 
     loadPodcastI18nStrings() {
         try {
@@ -200,7 +200,7 @@ class podcastCore extends podcastData {
 
     searchPodcast(data) {
         let defer = libQ.defer();
-        const searchPodcast = data['search_keyword'].trim();;
+        const searchPodcast = data['search_keyword'].trim();
 
         this.searchKeyword = searchPodcast;
         if (!searchPodcast) {
@@ -246,7 +246,7 @@ class podcastCore extends podcastData {
                         this.searchedPodcasts.push(item);
                     });
                     this.toast('info', this.getI18nString('MESSAGE_SUCCESS_SEARCH_RESULT_PODCAST'));
-                };
+                }
                 this.context.updatePodcastUIConfig();
                 defer.resolve();
             })
@@ -258,7 +258,7 @@ class podcastCore extends podcastData {
             });
 
         return defer.promise;
-    };
+    }
 
     addPodcast(rssUrl) {
         if (!rssUrl) {
@@ -266,7 +266,7 @@ class podcastCore extends podcastData {
             return libQ.resolve();
         }
         return this.checkAddPodcast(rssUrl);
-    };
+    }
 
     deletePodcast(id, title) {
         let message, messageType;
@@ -288,7 +288,7 @@ class podcastCore extends podcastData {
         message = message.replace('{0}', title);
         this.toast(messageType, message);
         return libQ.resolve();
-    };
+    }
 
     writePodcastItems() {
         if (this.updatePodcastData) {

@@ -16,8 +16,7 @@ class podcastSetupUi {
         this.context.commandRouter.i18nJson(__dirname+'/i18n/strings_' + lang_code + '.json',
             __dirname + '/i18n/strings_en.json',
             __dirname + '/UIConfig.json')
-            .then(function(uiconf)
-            {
+            .then((uiconf) => {
                 // setup user selected podcast list
                 this.context.podcastCore.podcastItems.forEach(entry => {
                     let podcastItem = {
@@ -38,7 +37,7 @@ class podcastSetupUi {
                     };
 
                     uiconf.sections[0].content[0].options.push(countryItem);
-                };
+                }
 
                 const foundRegions = uiconf.sections[0].content[0].options.find(item => item.langCode === lang_code);
                 if (foundRegions) {
@@ -63,22 +62,21 @@ class podcastSetupUi {
             });
 
         return defer.promise;
-    };
+    }
 
     updatePodcastUIConfig() {
         let lang_code = this.context.commandRouter.sharedVars.get('language_code');
         this.context.commandRouter.i18nJson(__dirname+'/i18n/strings_' + lang_code + '.json',
             __dirname + '/i18n/strings_en.json',
             __dirname + '/UIConfig.json')
-            .then(function(uiconf)
-            {
+            .then((uiconf) => {
                 // setup search regions
                 for (const entry in this.context.i18nCountry) {
                     this.context.commandRouter.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
                         label: this.context.i18nCountry[entry].country_name,
                         value: this.context.i18nCountry[entry].country_code
                     });
-                };
+                }
                 this.context.commandRouter.setUIConfigParam(uiconf, 'sections[0].content[0].value', this.podcastCore.selectedCountry);
 
                 // setup podcast search result section
@@ -130,7 +128,7 @@ class podcastSetupUi {
             {
                 new Error();
             });
-    };
+    }
 }
 
 module.exports = podcastSetupUi;
