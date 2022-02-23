@@ -94,7 +94,16 @@ class podcastBrowseUi {
 
             this.podcastCore.fetchRssUrl(targetPodcast.url)
                 .then((feed) => {
-                    response.navigation.lists[0].title = feed.rss.channel.title;
+                    let title = feed.rss.channel.title;
+                    let html = `<div style="display: flex; width: 100%; align-items: flex-start; flex-direction: column">
+                    <div>${title}</div>`
+
+                    if (feed.rss.channel.lastBuildDate)
+                        html += `<i><div style="flex-grow: 1; text-align: right; font-size: small;">
+                            Last Build Date: ${feed.rss.channel.lastBuildDate}</div></i>`
+                    if (feed.rss.channel.description)
+                        html += `<div style="font-size: medium">${feed.rss.channel.description}</div>`;
+                    response.navigation.lists[0].title = html;
 
                     if (!feed.rss.channel.item) {
                         feed.rss.channel.item = [];
