@@ -95,14 +95,17 @@ class podcastBrowseUi {
             this.podcastCore.fetchRssUrl(targetPodcast.url)
                 .then((feed) => {
                     let title = feed.rss.channel.title;
-                    let html = `<div style="display: flex; width: 100%; align-items: flex-start; flex-direction: column">
+                    let html = `<div style="display: flex;margin: 0 0 12px;">
+                    <img src=${feed.rss.channel['itunes:image'].href} onerror="/albumart?sourceicon=music_service/podcast/default.jpg" width="190" height="190" />
+                    <div style="display: flex; width: 100%; align-items: flex-start; flex-direction: column; margin-left: 15px;">
                     <div>${title}</div>`
 
                     if (feed.rss.channel.lastBuildDate)
                         html += `<i><div style="flex-grow: 1; text-align: right; font-size: small;">
                             Last Build Date: ${feed.rss.channel.lastBuildDate}</div></i>`
                     if (feed.rss.channel.description)
-                        html += `<div style="font-size: medium">${feed.rss.channel.description}</div>`;
+                        html += `<div style="font-size: medium; margin-top: 10px;">${feed.rss.channel.description}</div>`;
+                    html += "</div>"
                     response.navigation.lists[0].title = html;
 
                     if (!feed.rss.channel.item) {

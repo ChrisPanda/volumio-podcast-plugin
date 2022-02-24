@@ -24,10 +24,6 @@ class podcastCore extends podcastData {
         this.podcasts = fs.readJsonSync(__dirname+'/podcasts_list.json');
     }
 
-    logger() {
-        return this.context.commandRouter.logger;
-    }
-
     toast(type, message, title = this.getI18nString('PLUGIN_NAME')) {
         this.context.commandRouter.pushToastMessage(type, title, message);
     }
@@ -85,8 +81,7 @@ class podcastCore extends podcastData {
                 },
                 (error) => {
                     clearTimeout(timeout);
-                    this.logger().info("ControllerPodcast::fetchRssUrl:timed out: ["+
-                        Date.now() + "] url=" + request.url+", error="+error);
+                    this.context.logger.info("ControllerPodcast::fetchRssUrl:timed out=" + request.url+", error="+error);
                     reject();
                 }
             )
@@ -102,8 +97,7 @@ class podcastCore extends podcastData {
                     resolve(feed);
                 })
                 .catch((error) => {
-                    this.logger.info('ControllerPodcast::fetchRssUrl: [' +
-                        Date.now() + '] ' + '[Podcast] Error: ' + error);
+                    this.context.logger.info('ControllerPodcast::fetchRssUrl:Error: ' + error);
                     reject();
                 });
         });
@@ -128,8 +122,7 @@ class podcastCore extends podcastData {
             }
         }
         catch (error) {
-            this.logger.info('ControllerPodcast::checkAddPodcast:ssenhosting: [' +
-                Date.now() + '] ' + '[Podcast] Error: ' + error);
+            this.context.logger.info('ControllerPodcast::checkAddPodcast:ssenhosting: Error: ' + error);
             this.toast('error',
                 this.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
             defer.reject();
@@ -188,8 +181,7 @@ class podcastCore extends podcastData {
                 defer.resolve();
             })
             .catch(error => {
-                this.logger.info('ControllerPodcast::checkAddPodcast: [' +
-                    Date.now() + '] ' + '[Podcast] Error: ' + error);
+                this.context.logger.info('ControllerPodcast::checkAddPodcast: Error: ' + error);
                 this.toast('error',
                     this.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
                 defer.reject();
@@ -251,8 +243,7 @@ class podcastCore extends podcastData {
                 defer.resolve();
             })
             .catch(error => {
-                this.logger.info('ControllerPodcast::searchPodcast: [' +
-                    Date.now() + '] ' + '[Podcast] Error: ' + error);
+                this.context.logger.info('ControllerPodcast::searchPodcast: Error: ' + error);
                 defer.resolve();
                 this.toast('error', this.getI18nString('SEARCH_PODCAST_ERROR'));
             });
