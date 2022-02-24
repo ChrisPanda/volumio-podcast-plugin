@@ -93,71 +93,76 @@ class podcastBrowseUi {
             this.podcastCore.toast('info', message);
 
             this.podcastCore.fetchRssUrl(targetPodcast.url)
-                .then((feed) => {
-                    let title = feed.rss.channel.title;
-                    let html = `<div style="display: flex;margin: 0 0 12px;">
-                    <img src=${feed.rss.channel['itunes:image'].href} onerror="/albumart?sourceicon=music_service/podcast/default.jpg" width="190" height="190" />
-                    <div style="display: flex; width: 100%; align-items: flex-start; flex-direction: column; margin-left: 15px;">
-                    <div>${title}</div>`
+            .then(feed => {
+                let title = feed.rss.channel.title;
+                let html = `<div style="display: flex;margin: 0 0 12px;">
+                <img 
+                    src=${feed.rss.channel['itunes:image'].href} 
+                    onerror="/albumart?sourceicon=music_service/podcast/default.jpg" 
+                    width="190" 
+                    height="190"
+                />
+                <div style="display: flex; width: 100%; align-items: flex-start; flex-direction: column; margin-left: 15px;">
+                <div>${title}</div>`
 
-                    if (feed.rss.channel.lastBuildDate)
-                        html += `<i><div style="flex-grow: 1; text-align: right; font-size: small;">
-                            Last Build Date: ${feed.rss.channel.lastBuildDate}</div></i>`
-                    if (feed.rss.channel.description)
-                        html += `<div style="font-size: medium; margin-top: 10px;">${feed.rss.channel.description}</div>`;
-                    html += "</div>"
-                    response.navigation.lists[0].title = html;
+                if (feed.rss.channel.lastBuildDate)
+                    html += `<i><div style="flex-grow: 1; text-align: right; font-size: small;">
+                        Last Build Date: ${feed.rss.channel.lastBuildDate}</div></i>`
+                if (feed.rss.channel.description)
+                    html += `<div style="font-size: medium; margin-top: 10px;">${feed.rss.channel.description}</div>`;
+                html += "</div>"
+                response.navigation.lists[0].title = html;
 
-                    if (!feed.rss.channel.item) {
-                        feed.rss.channel.item = [];
-                    }
-                    if (!Array.isArray(feed.rss.channel.item)) {
-                        let tempItem = feed.rss.channel.item;
-                        feed.rss.channel.item = [];
-                        feed.rss.channel.item.push(tempItem);
-                    }
+                if (!feed.rss.channel.item) {
+                    feed.rss.channel.item = [];
+                }
+                if (!Array.isArray(feed.rss.channel.item)) {
+                    let tempItem = feed.rss.channel.item;
+                    feed.rss.channel.item = [];
+                    feed.rss.channel.item.push(tempItem);
+                }
 
-                    feed.rss.channel.item.some( (entry, index) => {
-                        if (entry.enclosure && entry.enclosure.url) {
-                            let imageUrl;
-                            if ((entry.image !== undefined) && (entry.image.url !== undefined))
-                                imageUrl = entry.image.url;
-                            else if ((entry['itunes:image'] !== undefined) && (entry['itunes:image'].href !== undefined))
-                                imageUrl = entry['itunes:image'].href;
-                            else if (entry.image !== undefined)
-                                imageUrl = entry.image
+                feed.rss.channel.item.some( (entry, index) => {
+                    if (entry.enclosure && entry.enclosure.url) {
+                        let imageUrl;
+                        if ((entry.image !== undefined) && (entry.image.url !== undefined))
+                            imageUrl = entry.image.url;
+                        else if ((entry['itunes:image'] !== undefined) && (entry['itunes:image'].href !== undefined))
+                            imageUrl = entry['itunes:image'].href;
+                        else if (entry.image !== undefined)
+                            imageUrl = entry.image
 
-                            const param = {
-                                title: entry.title,
-                                url: entry.enclosure.url,
-                                albumart: imageUrl
-                            }
-                            const urlParam = JSON.stringify(param);
-                            let podcastItem = {
-                                service: this.context.serviceName,
-                                type: 'mywebradio',
-                                title: entry.title,
-                                uri: `podcast/${podcastId}/${encodeURIComponent(urlParam)}`
-                            };
-                            if (imageUrl)
-                                podcastItem.albumart = imageUrl
-                            else
-                                podcastItem.icon = 'fa fa-podcast'
-
-                            response.navigation.lists[0].items.push(podcastItem);
+                        const param = {
+                            title: entry.title,
+                            url: entry.enclosure.url,
+                            albumart: imageUrl
                         }
-                        return (index > this.podcastCore.maxEpisodesCount);  // limits podcast episodes
-                    });
+                        const urlParam = JSON.stringify(param);
+                        let podcastItem = {
+                            service: this.context.serviceName,
+                            type: 'mywebradio',
+                            title: entry.title,
+                            uri: `podcast/${podcastId}/${encodeURIComponent(urlParam)}`
+                        };
+                        if (imageUrl)
+                            podcastItem.albumart = imageUrl
+                        else
+                            podcastItem.icon = 'fa fa-podcast'
 
-                    this.cache.set(targetPodcast.id, response);
-                    defer.resolve(response);
-                })
-                .catch((error) => {
-                    this.context.logger.info('ControllerPodcast::getPodcastContent: error= ' + error);
-                    this.podcastCore.toast('error',targetPodcast.title +
-                        ": " + this.podcastCore.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
-                    defer.reject();
-                })
+                        response.navigation.lists[0].items.push(podcastItem);
+                    }
+                    return (index > this.podcastCore.maxEpisodesCount);  // limits podcast episodes
+                });
+
+                this.cache.set(targetPodcast.id, response);
+                defer.resolve(response);
+            })
+            .catch((error) => {
+                this.context.logger.info('ControllerPodcast::getPodcastContent: error= ' + error);
+                this.podcastCore.toast('error',targetPodcast.title +
+                    ": " + this.podcastCore.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
+                defer.reject();
+            })
         }
         else {
             // reload current podcast items from caching

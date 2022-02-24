@@ -85,21 +85,21 @@ class podcastCore extends podcastData {
                     reject();
                 }
             )
-                .then((response) => response.text())
-                .then((fetchData) => {
-                    const options = {
-                        ignoreAttributes : false,
-                        attributeNamePrefix: ""
-                    };
+            .then((response) => response.text())
+            .then((fetchData) => {
+                const options = {
+                    ignoreAttributes : false,
+                    attributeNamePrefix: ""
+                };
 
-                    const parser = new XMLParser(options);
-                    let feed = parser.parse(fetchData);
-                    resolve(feed);
-                })
-                .catch((error) => {
-                    this.context.logger.info('ControllerPodcast::fetchRssUrl:Error: ' + error);
-                    reject();
-                });
+                const parser = new XMLParser(options);
+                let feed = parser.parse(fetchData);
+                resolve(feed);
+            })
+            .catch((error) => {
+                this.context.logger.info('ControllerPodcast::fetchRssUrl:Error: ' + error);
+                reject();
+            });
         });
     }
 
@@ -138,54 +138,54 @@ class podcastCore extends podcastData {
         this.toast('info', this.getI18nString('ADD_PODCAST_PROCESSING'));
 
         this.fetchRssUrl(rssUrl)
-            .then((feed) => {
-                let imageUrl, podcastItem;
+        .then(feed => {
+            let imageUrl, podcastItem;
 
-                if ( feed.rss.channel.image && feed.rss.channel.image.url )
-                    imageUrl = feed.rss.channel.image.url;
-                else if ( feed.rss.channel['itunes:image'] )
-                    imageUrl = feed.rss.channel['itunes:image'].href;
-                else if ( feed.rss.channel.itunes && feed.rss.channel.itunes.image )
-                    imageUrl = feed.rss.channel.itunes.image;
+            if ( feed.rss.channel.image && feed.rss.channel.image.url )
+                imageUrl = feed.rss.channel.image.url;
+            else if ( feed.rss.channel['itunes:image'] )
+                imageUrl = feed.rss.channel['itunes:image'].href;
+            else if ( feed.rss.channel.itunes && feed.rss.channel.itunes.image )
+                imageUrl = feed.rss.channel.itunes.image;
 
-                // check validation of image url
-                let validUrl;
-                try {
-                    const checkUrl = new URL(imageUrl);
-                    validUrl = checkUrl.protocol === "http:" || checkUrl.protocol === "https:"
-                }
-                catch (_) {
-                    validUrl = false;
-                }
-                if (!validUrl)
-                    imageUrl = '/albumart?sourceicon=music_service/podcast/default.jpg';
+            // check validation of image url
+            let validUrl;
+            try {
+                const checkUrl = new URL(imageUrl);
+                validUrl = checkUrl.protocol === "http:" || checkUrl.protocol === "https:"
+            }
+            catch (_) {
+                validUrl = false;
+            }
+            if (!validUrl)
+                imageUrl = '/albumart?sourceicon=music_service/podcast/default.jpg';
 
-                const feedTitle = feed.rss.channel.title;
-                podcastItem = {
-                    id: Math.random().toString(36).substring(2, 10) +
-                        Math.random().toString(36).substring(2, 10),
-                    title: feedTitle,
-                    url: rssUrl,
-                    image: imageUrl
-                };
+            const feedTitle = feed.rss.channel.title;
+            podcastItem = {
+                id: Math.random().toString(36).substring(2, 10) +
+                    Math.random().toString(36).substring(2, 10),
+                title: feedTitle,
+                url: rssUrl,
+                image: imageUrl
+            };
 
-                this.podcastItems.push(podcastItem);
-                this.updatePodcastData = true;
-                this.hideSearchResult = true;
-                this.context.updatePodcastUIConfig();
+            this.podcastItems.push(podcastItem);
+            this.updatePodcastData = true;
+            this.hideSearchResult = true;
+            this.context.updatePodcastUIConfig();
 
-                message = this.getI18nString('ADD_PODCAST_COMPLETION');
-                message = message.replace('{0}', feedTitle);
-                this.toast('success', message);
+            message = this.getI18nString('ADD_PODCAST_COMPLETION');
+            message = message.replace('{0}', feedTitle);
+            this.toast('success', message);
 
-                defer.resolve();
-            })
-            .catch(error => {
-                this.context.logger.info('ControllerPodcast::checkAddPodcast: Error: ' + error);
-                this.toast('error',
-                    this.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
-                defer.reject();
-            })
+            defer.resolve();
+        })
+        .catch(error => {
+            this.context.logger.info('ControllerPodcast::checkAddPodcast: Error: ' + error);
+            this.toast('error',
+                this.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
+            defer.reject();
+        })
 
         return defer.promise;
     }
