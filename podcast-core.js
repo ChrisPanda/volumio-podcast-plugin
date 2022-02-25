@@ -138,7 +138,8 @@ class podcastCore extends podcastData {
         }
         this.toast('info', this.getI18nString('ADD_PODCAST_PROCESSING'));
 
-        this.fetchRssUrl(rssUrl)
+        //this.fetchRssUrl(rssUrl)
+        this.context.newFetchRssUrl(rssUrl)
         .then(feed => {
             let imageUrl, podcastItem;
 
