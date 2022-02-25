@@ -70,14 +70,15 @@ class podcastCore extends podcastData {
         }
 
         return new Promise((resolve, reject) => {
-            const timeout = setTimeout(reject, request.timeoutMs);
+            const timeout = setTimeout(() => reject(new Error('==fetch timeout==')), request.timeoutMs);
             let options = fetchRequest || {};
             options.credentials = 'same-origin';
 
-            fetch(request.url, options).then(
+            fetch(request.url, options)
+            .then(
                 (response) => {
                     clearTimeout(timeout);
-                    return response;
+                    return response.text();
                 },
                 (error) => {
                     clearTimeout(timeout);
@@ -85,7 +86,6 @@ class podcastCore extends podcastData {
                     reject();
                 }
             )
-            .then((response) => response.text())
             .then((fetchData) => {
                 const options = {
                     ignoreAttributes : false,
@@ -97,6 +97,7 @@ class podcastCore extends podcastData {
                 resolve(feed);
             })
             .catch((error) => {
+                clearTimeout(timeout);
                 this.context.logger.info('ControllerPodcast::fetchRssUrl:Error: ' + error);
                 reject();
             });
