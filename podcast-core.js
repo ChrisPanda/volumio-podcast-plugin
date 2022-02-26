@@ -30,6 +30,7 @@ function PodcastCore () {
         let self = this
         self.context = context;
         self.podcasts = fs.readJsonSync(__dirname+'/podcasts_list.json');
+        self.logger = context.logger;
 
         self.loadPodcastI18nStrings();
     }
@@ -259,7 +260,7 @@ function PodcastCore () {
                 defer.resolve();
             })
             .catch(error => {
-                self.context.logger.info('ControllerPodcast::searchPodcast: Error: ' + error);
+                self.logger.info('ControllerPodcast::searchPodcast: Error: ' + error);
                 self.toast('error', this.getI18nString('SEARCH_PODCAST_ERROR'));
                 defer.resolve();
             });
