@@ -56,6 +56,7 @@ function PodcastCore () {
     }
 
     const fetchRssUrl= function(url) {
+        let self = this
         let request = {
             type: 'GET',
             url: url,
@@ -94,7 +95,7 @@ function PodcastCore () {
                 },
                 (error) => {
                     clearTimeout(timeout);
-                    this.logger.info("ControllerPodcast::fetchRssUrl:timed error=" + request.url+", error="+error);
+                    self.logger.info("ControllerPodcast::fetchRssUrl:timed error=" + request.url+", error="+error);
                     reject();
                 }
             )
@@ -110,13 +111,14 @@ function PodcastCore () {
             })
             .catch((error) => {
                 clearTimeout(timeout);
-                this.logger.info('ControllerPodcast::fetchRssUrl:Error: ' + error);
+                self.logger.info('ControllerPodcast::fetchRssUrl:Error: ' + error);
                 reject();
             });
         });
     }
 
     const checkAddPodcast = function(rssUrl) {
+        let self = this
         let defer = libQ.defer();
         let message;
 
@@ -135,13 +137,13 @@ function PodcastCore () {
             }
         }
         catch (error) {
-            this.logger.info('ControllerPodcast::checkAddPodcast:ssenhosting: Error: ' + error);
+            self.logger.info('ControllerPodcast::checkAddPodcast:ssenhosting: Error: ' + error);
             toast('error', getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
             defer.reject();
             return;
         }
 
-        let findItem = this.podcasts.items.find( item => item.url === rssUrl);
+        let findItem = self.podcasts.items.find( item => item.url === rssUrl);
         if (findItem) {
             toast('info', getI18nString('DUPLICATED_PODCAST'));
             defer.resolve();
@@ -181,10 +183,10 @@ function PodcastCore () {
                 image: imageUrl
             };
 
-            this.podcasts.items.push(podcastItem);
-            this.updatePodcastData = true;
-            this.hideSearchResult = true;
-            this.context.updatePodcastUIConfig();
+            self.podcasts.items.push(podcastItem);
+            self.updatePodcastData = true;
+            self.hideSearchResult = true;
+            self.context.updatePodcastUIConfig();
 
             message = getI18nString('ADD_PODCAST_COMPLETION');
             message = message.replace('{0}', feedTitle);
@@ -193,7 +195,7 @@ function PodcastCore () {
             defer.resolve();
         })
         .catch(error => {
-            this.logger.info('ControllerPodcast::checkAddPodcast: Error: ' + error);
+            self.logger.info('ControllerPodcast::checkAddPodcast: Error: ' + error);
             toast('error', getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
             defer.reject();
         })
@@ -202,21 +204,22 @@ function PodcastCore () {
     }
 
     const searchPodcast= function(data) {
+        let self = this
         let defer = libQ.defer();
         const searchPodcast = data['search_keyword'].trim();
 
-        this.searchKeyword = searchPodcast;
+        self.searchKeyword = searchPodcast;
         if (!searchPodcast) {
             toast('error', getI18nString('MESSAGE_ERROR_INPUT_KEYWORD'));
             return libQ.resolve();
         }
 
-        this.searchedPodcasts = [];
+        self.searchedPodcasts = [];
         let message = getI18nString('SEARCHING_WAIT_PODCAST');
-        message = message.replace('{0}', this.selectedCountry.label);
+        message = message.replace('{0}', self.selectedCountry.label);
         toast('info', message);
 
-        const country = this.selectedCountry.value;
+        const country = self.selectedCountry.value;
         let query = {
             term: searchPodcast.trim(),
             country: country,
@@ -237,24 +240,24 @@ function PodcastCore () {
             .then((response) => response.json())
             .then((items) => {
                 if (!items || items.resultCount === 0) {
-                    this.hideSearchResult = true;
+                    self.hideSearchResult = true;
                     toast('info', getI18nString('MESSAGE_NONE_SEARCH_RESULT_PODCAST'));
                 } else {
-                    this.hideSearchResult = false;
+                    self.hideSearchResult = false;
                     items.results.some(entry => {
                         let item = {
                             title: entry.collectionName,
                             url: entry.feedUrl
                         }
-                        this.searchedPodcasts.push(item);
+                        self.searchedPodcasts.push(item);
                     });
                     toast('info', getI18nString('MESSAGE_SUCCESS_SEARCH_RESULT_PODCAST'));
                 }
-                this.context.updatePodcastUIConfig();
+                self.context.updatePodcastUIConfig();
                 defer.resolve();
             })
             .catch(error => {
-                this.context.logger.info('ControllerPodcast::searchPodcast: Error: ' + error);
+                self.context.logger.info('ControllerPodcast::searchPodcast: Error: ' + error);
                 defer.resolve();
                 toast('error', getI18nString('SEARCH_PODCAST_ERROR'));
             });
@@ -271,15 +274,16 @@ function PodcastCore () {
     }
 
     const deletePodcast= function(id, title) {
+        let self = this
         let message, messageType;
 
         const index = this.podcasts.items.map(item => item.id).indexOf(id);
         if (index > -1) {
-            this.podcasts.items.splice(index, 1);
+            self.podcasts.items.splice(index, 1);
 
-            this.updatePodcastData = true;
-            this.hideSearchResult = true;
-            this.context.updatePodcastUIConfig();
+            self.updatePodcastData = true;
+            self.hideSearchResult = true;
+            self.context.updatePodcastUIConfig();
             message = getI18nString('DELETE_PODCAST_COMPLETION');
             messageType = 'success';
         }
