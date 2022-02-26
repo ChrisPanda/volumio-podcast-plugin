@@ -12,28 +12,26 @@ module.exports = PodcastCore;
 
 function PodcastCore () {
 
-    const init = function (context) {
-        this.context = context;
-        this.podcasts = {
-            items: [],
-            maxEpisode: 100
-        }
-        this.searchedPodcasts = [];
-        this.searchKeyword = "";
-        this.selectedCountry = {};
-        this.hideSearchResult = true;
-        this.updatePodcastData = false;
-
-        this.i18nCountry = {};
-        this.i18nStrings = {};
-        this.i18nStringsDefaults = {};
-        this.podcasts = fs.readJsonSync(__dirname+'/podcasts_list.json');
-
-        loadPodcastI18nStrings();
+    this.podcasts = {
+        items: [],
+        maxEpisode: 100
     }
+    this.searchedPodcasts = [];
+    this.searchKeyword = "";
+    this.selectedCountry = {};
+    this.hideSearchResult = true;
+    this.updatePodcastData = false;
 
-    const toast = function(type, message, title = this.getI18nString('PLUGIN_NAME')) {
-        this.context.commandRouter.pushToastMessage(type, title, message);
+    this.i18nCountry = {};
+    this.i18nStrings = {};
+    this.i18nStringsDefaults = {};
+
+    const init = function (context) {
+        let self = this
+        self.context = context;
+        self.podcasts = fs.readJsonSync(__dirname+'/podcasts_list.json');
+
+        self.loadPodcastI18nStrings();
     }
 
     const getI18nString = function (key) {
@@ -41,6 +39,10 @@ function PodcastCore () {
             return this.i18nStrings[key];
         else
             return this.i18nStringsDefaults[key];
+    }
+
+    const toast = function(type, message, title = this.getI18nString('PLUGIN_NAME')) {
+        this.context.commandRouter.pushToastMessage(type, title, message);
     }
 
     const loadPodcastI18nStrings = function() {
@@ -138,20 +140,20 @@ function PodcastCore () {
         }
         catch (error) {
             self.logger.info('ControllerPodcast::checkAddPodcast:ssenhosting: Error: ' + error);
-            toast('error', getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
+            self.toast('error', this.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
             defer.reject();
             return;
         }
 
         let findItem = self.podcasts.items.find( item => item.url === rssUrl);
         if (findItem) {
-            toast('info', getI18nString('DUPLICATED_PODCAST'));
+            self.toast('info', this.getI18nString('DUPLICATED_PODCAST'));
             defer.resolve();
             return;
         }
-        toast('info', getI18nString('ADD_PODCAST_PROCESSING'));
+        self.toast('info', this.getI18nString('ADD_PODCAST_PROCESSING'));
 
-        fetchRssUrl(rssUrl)
+        self.fetchRssUrl(rssUrl)
         .then(feed => {
             let imageUrl, podcastItem;
 
@@ -188,15 +190,15 @@ function PodcastCore () {
             self.hideSearchResult = true;
             self.context.updatePodcastUIConfig();
 
-            message = getI18nString('ADD_PODCAST_COMPLETION');
+            message = this.getI18nString('ADD_PODCAST_COMPLETION');
             message = message.replace('{0}', feedTitle);
-            toast('success', message);
+            self.toast('success', message);
 
             defer.resolve();
         })
         .catch(error => {
             self.logger.info('ControllerPodcast::checkAddPodcast: Error: ' + error);
-            toast('error', getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
+            self.toast('error', this.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
             defer.reject();
         })
 
@@ -210,14 +212,14 @@ function PodcastCore () {
 
         self.searchKeyword = searchPodcast;
         if (!searchPodcast) {
-            toast('error', getI18nString('MESSAGE_ERROR_INPUT_KEYWORD'));
+            self.toast('error', this.getI18nString('MESSAGE_ERROR_INPUT_KEYWORD'));
             return libQ.resolve();
         }
 
         self.searchedPodcasts = [];
-        let message = getI18nString('SEARCHING_WAIT_PODCAST');
+        let message = this.getI18nString('SEARCHING_WAIT_PODCAST');
         message = message.replace('{0}', self.selectedCountry.label);
-        toast('info', message);
+        self.toast('info', message);
 
         const country = self.selectedCountry.value;
         let query = {
@@ -241,7 +243,7 @@ function PodcastCore () {
             .then((items) => {
                 if (!items || items.resultCount === 0) {
                     self.hideSearchResult = true;
-                    toast('info', getI18nString('MESSAGE_NONE_SEARCH_RESULT_PODCAST'));
+                    self.toast('info', this.getI18nString('MESSAGE_NONE_SEARCH_RESULT_PODCAST'));
                 } else {
                     self.hideSearchResult = false;
                     items.results.some(entry => {
@@ -251,15 +253,15 @@ function PodcastCore () {
                         }
                         self.searchedPodcasts.push(item);
                     });
-                    toast('info', getI18nString('MESSAGE_SUCCESS_SEARCH_RESULT_PODCAST'));
+                    self.toast('info', this.getI18nString('MESSAGE_SUCCESS_SEARCH_RESULT_PODCAST'));
                 }
                 self.context.updatePodcastUIConfig();
                 defer.resolve();
             })
             .catch(error => {
                 self.context.logger.info('ControllerPodcast::searchPodcast: Error: ' + error);
+                self.toast('error', this.getI18nString('SEARCH_PODCAST_ERROR'));
                 defer.resolve();
-                toast('error', getI18nString('SEARCH_PODCAST_ERROR'));
             });
 
         return defer.promise;
@@ -267,7 +269,7 @@ function PodcastCore () {
 
     const addPodcast= function(rssUrl) {
         if (!rssUrl) {
-            toast('error', getI18nString('MESSAGE_ERROR_INPUT_RSS_URL'));
+            this.toast('error', this.getI18nString('MESSAGE_ERROR_INPUT_RSS_URL'));
             return libQ.resolve();
         }
         return checkAddPodcast(rssUrl);
@@ -284,15 +286,15 @@ function PodcastCore () {
             self.updatePodcastData = true;
             self.hideSearchResult = true;
             self.context.updatePodcastUIConfig();
-            message = getI18nString('DELETE_PODCAST_COMPLETION');
+            message = this.getI18nString('DELETE_PODCAST_COMPLETION');
             messageType = 'success';
         }
         else {
-            message = getI18nString('DELETE_PODCAST_ERROR');
+            message = this.getI18nString('DELETE_PODCAST_ERROR');
             messageType = 'error';
         }
         message = message.replace('{0}', title);
-        toast(messageType, message);
+        self.toast(messageType, message);
         return libQ.resolve();
     }
 
@@ -310,9 +312,9 @@ function PodcastCore () {
 
         this.context.podcastBrowseUi.deleteAllCache();
 
-        let message = getI18nString('CHANGED_MAX_EPISODE');
+        let message = this.getI18nString('CHANGED_MAX_EPISODE');
         message = message.replace('{0}', maxNum);
-        toast('info', message);
+        this.toast('info', message);
     }
 
     return {
