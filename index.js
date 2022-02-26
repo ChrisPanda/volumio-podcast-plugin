@@ -273,7 +273,7 @@ ControllerPodcast.prototype.explodeUri = function (uri) {
 
   const podcastId = uris[1];
   const podcastParam = uris[2];
-  const podcastItem = this.podcastCore.podcastItems.find(item => item.id === podcastId);
+  const podcastItem = this.podcastCore.podcasts.items.find(item => item.id === podcastId);
 
   const episode = JSON.parse(decodeURIComponent(podcastParam));
   response.push({
