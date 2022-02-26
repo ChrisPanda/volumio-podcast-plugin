@@ -253,7 +253,7 @@ ControllerPodcast.prototype.handleBrowseUri = function (curUri) {
   return response
       .fail(function (e) {
         self.logger.info('ControllerPodcast::handleBrowseUri: response failed=',e);
-        libQ.reject(new Error());
+        libQ.reject(new Error('ControllerPodcast response error'));
       });
 };
 
@@ -332,7 +332,7 @@ ControllerPodcast.prototype.clearAddPlayTrack = function(track) {
 
     })
     .fail(function (e) {
-      return libQ.reject(new Error());
+      return libQ.reject(new Error('ControllerPodcast:clearAddPlayTrack'));
     });
 };
 

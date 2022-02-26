@@ -3,21 +3,23 @@
 const libQ = require('kew');
 const NodeCache = require('node-cache');
 
-class podcastBrowseUi {
-    constructor(context) {
-        this.context = context;
-        this.podcastCore = context.podcastCore
-        this.cache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
-    }
+module.exports = PodcastBrowseUi;
 
-    deleteCache(value) {
+function PodcastBrowseUi(context) {
+
+    this.context = context;
+    this.podcastCore = context.podcastCore
+    this.cache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
+
+
+    const deleteCache = function(value) {
         this.cache.del(value);
     }
-    deleteAllCache() {
+    const deleteAllCache = function() {
         this.cache.flushAll();
     }
 
-    getRootContent() {
+    const getRootContent = function() {
         let response;
 
         let value = this.cache.get('root');
@@ -38,7 +40,7 @@ class podcastBrowseUi {
                 }
             };
 
-            this.podcastCore.podcastItems.forEach(entry => {
+            this.podcastCore.podcasts.items.forEach(entry => {
                 let imageUrl;
 
                 imageUrl = entry.image;
@@ -63,12 +65,12 @@ class podcastBrowseUi {
         }
     }
 
-    getPodcastContent(uri) {
+    const getPodcastContent = function(uri) {
         let defer = libQ.defer();
         let uris = uri.split('/');
 
         const podcastId = uris[1];
-        const targetPodcast = this.podcastCore.podcastItems.find(item => item.id === podcastId);
+        const targetPodcast = this.podcastCore.podcasts.items.find(item => item.id === podcastId);
         let podcastResponse = this.cache.get(targetPodcast.id);
         if (podcastResponse === undefined) {
             let response = {
@@ -151,7 +153,7 @@ class podcastBrowseUi {
 
                         response.navigation.lists[0].items.push(podcastItem);
                     }
-                    return (index > this.podcastCore.maxEpisodesCount);  // limits podcast episodes
+                    return (index > this.podcastCore.podcasts.maxEpisode);  // limits podcast episodes
                 });
 
                 this.cache.set(targetPodcast.id, response);
@@ -172,7 +174,7 @@ class podcastBrowseUi {
         return defer.promise;
     };
 
-    constructListTitleWithLink(title, links, isFirstList) {
+    function constructListTitleWithLink(title, links, isFirstList) {
         let html = `<div style="display: flex; width: 100%; align-items: flex-end;${isFirstList ? '' : ' margin-top: -24px;'}">
                     <div>${title}</div>
                     <div style="flex-grow: 1; text-align: right; font-size: small;">`;
@@ -194,7 +196,7 @@ class podcastBrowseUi {
         return html;
     }
 
-    constructLinkItem(link) {
+    function constructLinkItem(link) {
         let html = '';
         if (link.icon) {
             if (link.icon.type === 'fa' && link.icon.float !== 'right') {
@@ -214,6 +216,11 @@ class podcastBrowseUi {
 
         return html;
     }
-}
 
-module.exports = podcastBrowseUi;
+    return {
+        deleteCache: deleteCache,
+        deleteAllCache: deleteAllCache,
+        getRootContent: getRootContent,
+        getPodcastContent: getPodcastContent
+    }
+}

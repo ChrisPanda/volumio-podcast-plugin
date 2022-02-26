@@ -2,16 +2,16 @@
 
 const libQ = require('kew');
 
-class podcastSetupUi {
+module.exports = PodcastSetupUi;
 
-    constructor(context) {
-        this.context = context;
-        this.commandRouter = context.commandRouter
-        this.configManager = context.configManager
-        this.podcastCore = context.podcastCore
-    }
+function PodcastSetupUi(context) {
 
-    getPodcastUIConfig() {
+    this.context = context;
+    this.commandRouter = context.commandRouter
+    this.configManager = context.configManager
+    this.podcastCore = context.podcastCore
+
+    const getPodcastUIConfig = function() {
         let defer = libQ.defer();
         const lang_code = this.commandRouter.sharedVars.get('language_code');
 
@@ -21,7 +21,7 @@ class podcastSetupUi {
             __dirname + '/UIConfig.json')
             .then((uiconf) => {
                 // setup user selected podcast list
-                this.podcastCore.podcastItems.forEach(entry => {
+                this.podcastCore.podcasts.items.forEach(entry => {
                     let podcastItem = {
                         label: entry.title,
                         value: entry.id
@@ -54,7 +54,7 @@ class podcastSetupUi {
 
                 // setup max episode number
                 const maxEpisodeConfig = uiconf.sections[5].content[0].config;
-                maxEpisodeConfig.bars[0].value = this.podcastCore.maxEpisodesCount;
+                maxEpisodeConfig.bars[0].value = this.podcastCore.podcasts.maxEpisode;
                 uiconf.sections[5].content[0].value = maxEpisodeConfig.value;
 
                 defer.resolve(uiconf);
@@ -67,7 +67,7 @@ class podcastSetupUi {
         return defer.promise;
     }
 
-    updatePodcastUIConfig() {
+    const updatePodcastUIConfig = function() {
         let lang_code = this.commandRouter.sharedVars.get('language_code');
         this.commandRouter.i18nJson(__dirname+'/i18n/strings_' + lang_code + '.json',
             __dirname + '/i18n/strings_en.json',
@@ -106,7 +106,7 @@ class podcastSetupUi {
                 // setup search keyword value
                 this.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', this.podcastCore.searchKeyword);
 
-                const podcastsItems = this.podcastCore.podcastItems;
+                const podcastsItems = this.podcastCore.podcasts.items;
                 // setup selected podcast items
                 podcastsItems.forEach(entry => {
                     this.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
@@ -121,7 +121,7 @@ class podcastSetupUi {
 
                 // setup max episode number
                 let maxEpisodeConfig = uiconf.sections[5].content[0].config;
-                maxEpisodeConfig.bars[0].value = this.podcastCore.maxEpisodesCount;
+                maxEpisodeConfig.bars[0].value = this.podcastCore.podcasts.maxEpisode;
                 this.configManager.setUIConfigParam(uiconf, 'sections[5].content[0].config', maxEpisodeConfig);
 
                 this.podcastCore.writePodcastItems();
@@ -132,6 +132,9 @@ class podcastSetupUi {
                 new Error();
             });
     }
-}
 
-module.exports = podcastSetupUi;
+    return {
+        getPodcastUIConfig: getPodcastUIConfig,
+        updatePodcastUIConfig: updatePodcastUIConfig
+    }
+}
