@@ -5,12 +5,13 @@ const NodeCache = require('node-cache');
 
 module.exports = PodcastBrowseUi;
 
-function PodcastBrowseUi(context) {
+function PodcastBrowseUi() {
 
-    this.context = context;
-    this.podcastCore = context.podcastCore
-    this.cache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
-
+    const init = function(context) {
+        this.context = context;
+        this.podcastCore = context.podcastCore
+        this.cache = new NodeCache({stdTTL: 3600, checkperiod: 120});
+    }
 
     const deleteCache = function(value) {
         this.cache.del(value);
@@ -218,6 +219,7 @@ function PodcastBrowseUi(context) {
     }
 
     return {
+        init: init,
         deleteCache: deleteCache,
         deleteAllCache: deleteAllCache,
         getRootContent: getRootContent,

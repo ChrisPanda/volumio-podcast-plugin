@@ -6,31 +6,30 @@ const querystring = require("querystring");
 const fetch = require('node-fetch');
 const {XMLParser} = require('fast-xml-parser');
 const fs = require('fs-extra');
+const podcastSearchApi = 'https://itunes.apple.com';
 
 module.exports = PodcastCore;
 
 function PodcastCore () {
-    let podcasts = {
-        items: [],
-        maxEpisode: 100
-    }
-    this.searchedPodcasts = [];
-    this.searchKeyword = "";
-    this.selectedCountry = {};
-    this.hideSearchResult = true;
-    this.updatePodcastData = false;
 
-    this.i18nCountry = {};
-    this.i18nStrings = {};
-    this.i18nStringsDefaults = {};
-
-    this.podcastSearchApi = 'https://itunes.apple.com';
-
-    let init = function (context) {
+    const init = function (context) {
         this.context = context;
+        this.podcasts = {
+            items: [],
+            maxEpisode: 100
+        }
+        this.searchedPodcasts = [];
+        this.searchKeyword = "";
+        this.selectedCountry = {};
+        this.hideSearchResult = true;
+        this.updatePodcastData = false;
 
-        this.loadPodcastI18nStrings();
+        this.i18nCountry = {};
+        this.i18nStrings = {};
+        this.i18nStringsDefaults = {};
         this.podcasts = fs.readJsonSync(__dirname+'/podcasts_list.json');
+
+        loadPodcastI18nStrings();
     }
 
     const toast = function(type, message, title = this.getI18nString('PLUGIN_NAME')) {
@@ -234,7 +233,7 @@ function PodcastCore () {
             method: 'GET'
         };
 
-        fetch(`${this.podcastSearchApi}/${country}/search?${queryParam}`, options)
+        fetch(`${podcastSearchApi}/${country}/search?${queryParam}`, options)
             .then((response) => response.json())
             .then((items) => {
                 if (!items || items.resultCount === 0) {

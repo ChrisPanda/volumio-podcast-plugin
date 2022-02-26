@@ -41,9 +41,11 @@ ControllerPodcast.prototype.onStart = function() {
   self.mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service','mpd');
   this.serviceName = "podcast";
   this.podcastCore = new podcastCore();
+  this.podcastBrowseUi = new podcastBrowseUi();
+  this.podcastSetupUi = new podcastSetupUi();
   this.podcastCore.init(this);
-  this.podcastBrowseUi = new podcastBrowseUi(this);
-  this.podcastSetupUi = new podcastSetupUi(this);
+  this.podcastBrowseUi.init(this);
+  this.podcastSetupUi.init(this);
 
   self.addToBrowseSources();
   return libQ.resolve();

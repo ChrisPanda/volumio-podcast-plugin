@@ -4,12 +4,14 @@ const libQ = require('kew');
 
 module.exports = PodcastSetupUi;
 
-function PodcastSetupUi(context) {
+function PodcastSetupUi() {
 
-    this.context = context;
-    this.commandRouter = context.commandRouter
-    this.configManager = context.configManager
-    this.podcastCore = context.podcastCore
+    const init = function(context) {
+        this.context = context;
+        this.commandRouter = context.commandRouter
+        this.configManager = context.configManager
+        this.podcastCore = context.podcastCore
+    }
 
     const getPodcastUIConfig = function() {
         let defer = libQ.defer();
@@ -134,6 +136,7 @@ function PodcastSetupUi(context) {
     }
 
     return {
+        init: init,
         getPodcastUIConfig: getPodcastUIConfig,
         updatePodcastUIConfig: updatePodcastUIConfig
     }
