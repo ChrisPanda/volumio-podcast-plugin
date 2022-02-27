@@ -82,8 +82,7 @@ function PodcastCore () {
             let timeOutId = setTimeout(
                 () => {
                     clearTimeout(timeOutId);
-                    self.toast('error', this.getI18nString('MESSAGE_LOADING_RSS_FEED_TIMEOUT'));
-                    reject("fetchRssUrl timeout");
+                    resolve({timeout: true});
                 }
                 , 5000
             )
@@ -91,23 +90,33 @@ function PodcastCore () {
 
         const fetchUrl = new Promise((resolve, reject) => {
             fetch(request.url, fetchRequest)
-                .then( (response) => response.text() )
-                .then((fetchData) => {
-                    const options = {
-                        ignoreAttributes: false,
-                        attributeNamePrefix: ""
-                    };
-
-                    const parser = new XMLParser(options);
-                    let feed = parser.parse(fetchData);
-                    resolve(feed);
-                })
+                .then( (response) => response )
         })
 
         return Promise.race([
             fetchUrl,
             fetchTimer
-        ]).then(response => response)
+        ]).then(response => {
+            if (response.timeout) {
+                self.toast('error', this.getI18nString('MESSAGE_LOADING_RSS_FEED_TIMEOUT'));
+                return;
+            }
+            return response.text();
+        })
+        .then((fetchData) => {
+            if (fetchData) {
+                const options = {
+                    ignoreAttributes: false,
+                    attributeNamePrefix: ""
+                };
+
+                const parser = new XMLParser(options);
+                let feed = parser.parse(fetchData);
+                resolve(feed);
+            }
+            else
+                resolve();
+        })
         .catch((error) => {
             self.logger.info('ControllerPodcast::fetchRssUrl:Error: ' + request.url + ", error=" + error);
         })
