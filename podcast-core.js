@@ -64,26 +64,30 @@ function PodcastCore () {
     }
 
     const fetchRssUrl = function(url) {
-        let defer = libQ.defer();
+        let self = this
 
-        axios({
-            method: 'get',
-            url: url,
-            responseType: 'text',
-            timeout: 5000
+        return new Promise((resolve) => {
+            axios({
+                method: 'get',
+                url: url,
+                responseType: 'text',
+                timeout: 6000
+            })
+            .then( (response) => {
+                const options = {
+                    ignoreAttributes: false,
+                    attributeNamePrefix: ""
+                };
+
+                const parser = new XMLParser(options);
+                let feed = parser.parse(response.data);
+                resolve(feed);
+            })
+            .catch((error) => {
+                self.toast('error', this.getI18nString('MESSAGE_LOADING_RSS_FEED_TIMEOUT'));
+                self.logger.info('ControllerPodcast::fetchRssUrl:Error: ' + url + ", error=" + error);
+            })
         })
-        .then( (response) => {
-            const options = {
-                ignoreAttributes: false,
-                attributeNamePrefix: ""
-            };
-
-            const parser = new XMLParser(options);
-            let feed = parser.parse(response);
-            defer.promise(feed);
-        });
-
-        return defer.promise;
     }
 
     const fetchRssUrlOld= function(url) {
