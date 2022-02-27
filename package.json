@@ -26,8 +26,9 @@
     "kew": "^0.7.0",
     "node-cache": "^5.1.2",
     "fast-xml-parser": "^4.0.3",
-    "node-fetch": "^3.2.0",
-    "rss-parser": "^3.12.0"
+    "node-fetch": "^2.6.7",
+    "rss-parser": "^3.12.0",
+    "axios": "^0.26.0
   },
   "repository": "https://github.com/ChrisPanda/volumio-podcast-plugin",
   "keywords": [

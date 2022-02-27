@@ -3,14 +3,15 @@
 const libQ = require('kew');
 const urlModule = require('url');
 const querystring = require("querystring");
-//const fetch = require('node-fetch');
+const fetch = require('node-fetch');
 //https://github.com/node-fetch/node-fetch#installation
 //node-fetch from v3 is an ESM-only module - you are not able to import it with require().
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+//const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const {XMLParser} = require('fast-xml-parser');
 const fs = require('fs-extra');
-const rssParser = require('rss-parser');
+const RssParser = require('rss-parser');
 const podcastSearchApi = 'https://itunes.apple.com';
+const axios = require('axios');
 
 module.exports = PodcastCore;
 
@@ -62,7 +63,30 @@ function PodcastCore () {
         this.i18nStringsDefaults=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
     }
 
-    const fetchRssUrl= function(url) {
+    const fetchRssUrl = function(url) {
+        let defer = libQ.defer();
+
+        axios({
+            method: 'get',
+            url: url,
+            responseType: 'text',
+            timeout: 5000
+        })
+        .then( (response) => {
+            const options = {
+                ignoreAttributes: false,
+                attributeNamePrefix: ""
+            };
+
+            const parser = new XMLParser(options);
+            let feed = parser.parse(response);
+            defer.promise(feed);
+        });
+
+        return defer.promise;
+    }
+
+    const fetchRssUrlOld= function(url) {
         let self = this
         let request = {
             type: 'GET',
@@ -405,7 +429,9 @@ function PodcastCore () {
         getI18nString: getI18nString,
         loadPodcastI18nStrings: loadPodcastI18nStrings,
         fetchRssUrl: fetchRssUrl,
+        fetchRssUrlOld: fetchRssUrlOld,
         checkAddPodcast: checkAddPodcast,
+        newCheckAddPodcast: newCheckAddPodcast,
         searchPodcast: searchPodcast,
         addPodcast: addPodcast,
         deletePodcast: deletePodcast,
