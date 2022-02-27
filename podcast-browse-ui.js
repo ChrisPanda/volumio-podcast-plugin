@@ -113,8 +113,6 @@ function PodcastBrowseUi() {
                         Last Build Date: ${feed.rss.channel.lastBuildDate}</div></i>`
                 if (feed.rss.channel.description)
                     html += `<div style="font-size: medium; margin-top: 10px;">${feed.rss.channel.description}</div>`;
-                html += "</div>"
-                response.navigation.lists[0].title = html;
 
                 if (!feed.rss.channel.item) {
                     feed.rss.channel.item = [];
@@ -156,6 +154,61 @@ function PodcastBrowseUi() {
                     }
                     return (index > this.podcastCore.podcasts.maxEpisode);  // limits podcast episodes
                 });
+
+                html += `
+                    <p>episode description
+                    <a 
+                        href="javascript:void(0)" 
+                        onclick="document.getElementById('episode-note').style.display='block';document.getElementById('episode-background').style.display='block'"
+                    >
+                    here
+                    </a>
+                </p>
+                <div id="episode-note" style="
+                    display:none;
+                    position: absolute;
+                    color: black;
+                    top: 25%;
+                    left: 25%;
+                    width: 50%;
+                    height: 50%;
+                    padding: 5px;
+                    border: 2px solid orange;
+                    background-color: aliceblue;
+                    z-index: 1002;
+                    overflow: auto;"
+                >
+                    This is the episodes content. 
+                    <ul>
+                        <li>
+                        ${response.navigation.lists[0].items[0].title}
+                        </li>
+                        <li>
+                        ${response.navigation.lists[0].items[1].title}
+                        </li>
+                    </ul>
+                    <a href="javascript:void(0)"
+                        style="color: blue; text-decoration: underline;"
+                        onclick="document.getElementById('episode-note').style.display='none';document.getElementById('episode-background').style.display='none'"
+                     >close description
+                     </a>
+                </div>
+                <div id="episode-background" style="
+                    display: none;
+                    position: absolute;
+                    top: 0%;
+                    left: 0%;
+                    width: 100%;
+                    height: 100%;
+                    background-color: black;
+                    z-index: 1001;
+                    -moz-opacity: 0.8;
+                    opacity: .80;
+                    filter: alpha(opacity=80);
+                "></div>
+`
+                html += "</div>"
+                response.navigation.lists[0].title = html;
 
                 this.cache.set(targetPodcast.id, response);
                 defer.resolve(response);
