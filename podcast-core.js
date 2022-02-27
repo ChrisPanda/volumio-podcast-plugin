@@ -9,6 +9,7 @@ const querystring = require("querystring");
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const {XMLParser} = require('fast-xml-parser');
 const fs = require('fs-extra');
+const rssParser = require('rss-parser');
 const podcastSearchApi = 'https://itunes.apple.com';
 
 module.exports = PodcastCore;
@@ -78,7 +79,7 @@ function PodcastCore () {
             credentials: 'same-origin'
         };
 
-        const fetchTimer = new Promise((resolve, reject) => {
+        const fetchTimer = new Promise((resolve) => {
             let timeOutId = setTimeout(
                 () => {
                     clearTimeout(timeOutId);
@@ -88,18 +89,13 @@ function PodcastCore () {
             )
         })
 
-        const fetchUrl = new Promise((resolve, reject) => {
-            fetch(request.url, fetchRequest)
-                .then( (response) => response )
-        })
-
         return Promise.race([
-            fetchUrl,
+            fetch(request.url, fetchRequest),
             fetchTimer
         ]).then(response => {
             if (response.timeout) {
                 self.toast('error', this.getI18nString('MESSAGE_LOADING_RSS_FEED_TIMEOUT'));
-                return;
+                return null;
             }
             return response.text();
         })
@@ -112,58 +108,17 @@ function PodcastCore () {
 
                 const parser = new XMLParser(options);
                 let feed = parser.parse(fetchData);
-                resolve(feed);
+                return feed;
             }
-            else
-                resolve();
+            return null;
         })
         .catch((error) => {
             self.logger.info('ControllerPodcast::fetchRssUrl:Error: ' + request.url + ", error=" + error);
         })
-
-            /*
-        return new Promise((resolve, reject) => {
-            const timeout = setTimeout(
-                () => reject(new Error('ControllerPodcast::fetchRssUrl:TIMEOUT='+request.url)),
-                request.timeoutMs
-            );
-            let options = fetchRequest || {};
-            options.credentials = 'same-origin';
-
-            fetch(request.url, options)
-            .then(
-                (response) => {
-                    clearTimeout(timeout);
-                    return response.text();
-                },
-                (error) => {
-                    clearTimeout(timeout);
-                    self.logger.info("ControllerPodcast::fetchRssUrl:timed error=" + request.url+", error="+error);
-                    reject();
-                }
-            )
-            .then((fetchData) => {
-                const options = {
-                    ignoreAttributes : false,
-                    attributeNamePrefix: ""
-                };
-
-                const parser = new XMLParser(options);
-                let feed = parser.parse(fetchData);
-                resolve(feed);
-            })
-            .catch((error) => {
-                clearTimeout(timeout);
-                self.logger.info('ControllerPodcast::fetchRssUrl:Error: ' + error);
-                reject();
-            })
-        });
-             */
     }
 
     const checkAddPodcast = function(rssUrl) {
         let self = this
-        //let defer = libQ.defer();
         let message;
 
         let urlObj = urlModule.parse(rssUrl);
@@ -183,14 +138,12 @@ function PodcastCore () {
         catch (error) {
             self.logger.info('ControllerPodcast::checkAddPodcast:ssenhosting: Error: ' + error);
             self.toast('error', this.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
-            //defer.reject();
             return;
         }
 
         let findItem = self.podcasts.items.find( item => item.url === rssUrl);
         if (findItem) {
             self.toast('info', this.getI18nString('DUPLICATED_PODCAST'));
-            //defer.resolve();
             return;
         }
         self.toast('info', this.getI18nString('ADD_PODCAST_PROCESSING'));
@@ -237,16 +190,101 @@ function PodcastCore () {
             message = this.getI18nString('ADD_PODCAST_COMPLETION');
             message = message.replace('{0}', feedTitle);
             self.toast('success', message);
-
-            //defer.resolve();
         })
         .catch(error => {
             self.logger.info('ControllerPodcast::checkAddPodcast: Error: ' + error);
             self.toast('error', this.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
-            //defer.reject();
         })
+    }
 
-        //return defer.promise;
+    const newCheckAddPodcast = function(rssUrl) {
+        let self = this
+        let message;
+
+        let urlObj = urlModule.parse(rssUrl);
+        // exception handling for ssenhosting host url
+        try {
+            if (urlObj.hostname === "pod.ssenhosting.com") {
+                let pathValues = urlObj.pathname.substring(1).split("/");
+                if (pathValues.length === 2) {
+                    pathValues[1] = pathValues[1].split(".").shift();
+                }
+                if (pathValues.length === 3) {
+                    pathValues.splice(2, 1);
+                }
+                rssUrl = `${urlObj.protocol}//${urlObj.hostname}/${pathValues.join("/")}`
+            }
+        }
+        catch (error) {
+            self.logger.info('ControllerPodcast::checkAddPodcast:ssenhosting: Error: ' + error);
+            self.toast('error', self.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
+            return;
+        }
+
+        let findItem = self.podcasts.items.find( item => item.url === rssUrl);
+        if (findItem) {
+            self.toast('info', self.getI18nString('DUPLICATED_PODCAST'));
+            return;
+        }
+        self.toast('info', self.getI18nString('ADD_PODCAST_PROCESSING'));
+
+        const rssParser = new RssParser({
+            headers: {
+                'Accept': '*/*',
+                'User-Agent': 'Mozilla/5.0'
+            },
+            feed: {
+                channel: ['image']
+            }
+        });
+        rssParser.parseURL(rssUrl,
+            (err, feed) => {
+                if (err) {
+                    self.toast('error',  self.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
+                    return;
+                }
+
+                let imageUrl, podcastItem;
+
+                if ( (feed.image !== undefined) && (feed.image.url !== undefined) )
+                    imageUrl = feed.image.url;
+                else if ( (feed.itunes !== undefined)  && (feed.itunes.image !== undefined) )
+                    imageUrl = feed.itunes.image;
+
+                // check validation of image url
+                let validUrl;
+                try {
+                    const checkUrl = new URL(imageUrl);
+                    validUrl = checkUrl.protocol === "http:" || checkUrl.protocol === "https:"
+                }
+                catch (_) {
+                    validUrl = false;
+                }
+                if (!validUrl)
+                    imageUrl = '/albumart?sourceicon=music_service/podcast/default.jpg';
+
+                const feedTitle = feed.title;
+                podcastItem = {
+                    id: Math.random().toString(36).substring(2, 10) +
+                        Math.random().toString(36).substring(2, 10),
+                    title: feedTitle,
+                    url: rssUrl,
+                    image: imageUrl
+                };
+
+                self.podcasts.items.push(podcastItem);
+                self.updatePodcastData = true;
+                self.hideSearchResult = true;
+                self.context.updatePodcastUIConfig();
+
+                message = this.getI18nString('ADD_PODCAST_COMPLETION');
+                message = message.replace('{0}', feedTitle);
+                self.toast('success', message);
+            })
+            .catch(error => {
+                self.logger.info('ControllerPodcast::checkAddPodcast: Error: ' + error);
+                self.toast('error', this.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
+            })
     }
 
     const searchPodcast= function(data) {
