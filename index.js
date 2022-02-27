@@ -93,64 +93,6 @@ ControllerPodcast.prototype.setUIConfig = function(data)
 };
 
 // Podcast Methods -----------------------------------------------------
-ControllerPodcast.prototype.newFetchRssUrl = function(url) {
-  var self=this
-  var request = {
-    type: 'GET',
-    url: url,
-    dataType: 'text',
-    headers: {
-      'Accept': '*/*',
-      'User-Agent': 'Mozilla/5.0'
-    },
-    timeoutMs: 5000
-  };
-  const headers = request.headers || {};
-  const fetchRequest = {
-    headers,
-    method: request.type,
-    credentials: 'same-origin'
-  };
-  var contentType = request.contentType;
-  if (contentType) {
-    headers['Content-Type'] = contentType;
-  }
-
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error('==fetch timeout==')), request.timeoutMs);
-    var options = fetchRequest || {};
-    options.credentials = 'same-origin';
-
-    fetch(request.url, options)
-        .then(
-            (response) => {
-              clearTimeout(timeout);
-              return response.text();
-            },
-            (error) => {
-              clearTimeout(timeout);
-              self.logger.info("ControllerPodcast::fetchRssUrl:timed out=" + request.url+", error="+error);
-              reject();
-            }
-        )
-        .then((fetchData) => {
-          const options = {
-            ignoreAttributes : false,
-            attributeNamePrefix: ""
-          };
-
-          const parser = new XMLParser(options);
-          let feed = parser.parse(fetchData);
-          resolve(feed);
-        })
-        .catch((error) => {
-          clearTimeout(timeout);
-          self.logger.info('ControllerPodcast::fetchRssUrl:Error: ' + error);
-          reject();
-        });
-  });
-}
-
 ControllerPodcast.prototype.addPodcast = function(data) {
   var rssUrl = data['input_podcast'].trim();
 
@@ -208,10 +150,10 @@ ControllerPodcast.prototype.searchAddPodcast = function(data) {
   const rssUrl = data.search_result_podcast.url;
   if (!rssUrl) {
     this.podcastCore.toast('error', this.podcastCore.getI18nString('MESSAGE_INVALID_PODCAST_URL'));
-    return libQ.resolve();
+    return;
   }
 
-  return this.podcastCore.checkAddPodcast(rssUrl);
+  this.podcastCore.checkAddPodcast(rssUrl);
 };
 
 ControllerPodcast.prototype.selectCountry = function(data) {
@@ -224,8 +166,6 @@ ControllerPodcast.prototype.selectCountry = function(data) {
   this.podcastCore.toast('info', message);
 
   self.updatePodcastUIConfig();
-
-  return libQ.resolve();
 };
 
 // Playback Controls ---------------------------------------------------------

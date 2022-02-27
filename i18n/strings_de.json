@@ -10,6 +10,7 @@
   "MESSAGE_INVALID_PODCAST_FORMAT": "Podcast-RSS-Feed-Formatfehler oder nicht unterstütztes Format.",
   "MESSAGE_SUCCESS_SEARCH_RESULT_PODCAST": "Vollständige Podcast-Suchergebnisse",
   "MESSAGE_NONE_SEARCH_RESULT_PODCAST": "Geen podcasts gevonden",
+  "MESSAGE_LOADING_RSS_FEED_TIMEOUT": "Zeitüberschreitung beim Laden des Podcast-RSS-Feeds",
   "CLOSE": "Schließen",
   "CANCEL": "Abbrechen",
   "CONFIRM": "Bestätigen",

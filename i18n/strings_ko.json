@@ -10,6 +10,7 @@
   "MESSAGE_INVALID_PODCAST_FORMAT": "팟캐스트 RSS 피드 형식 오류 혹은 지원하지 않는 형식 입니다.",
   "MESSAGE_SUCCESS_SEARCH_RESULT_PODCAST": "팟캐스트 검색 결과 완료",
   "MESSAGE_NONE_SEARCH_RESULT_PODCAST": "검색한 팟캐스트가 없습니다.",
+  "MESSAGE_LOADING_RSS_FEED_TIMEOUT": "팟캐스트 RSS 피드 로딩 시간 초과",
   "CLOSE": "닫기",
   "CANCEL": "취소",
   "CONFIRM": "확인",

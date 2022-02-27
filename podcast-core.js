@@ -3,7 +3,10 @@
 const libQ = require('kew');
 const urlModule = require('url');
 const querystring = require("querystring");
-const fetch = require('node-fetch');
+//const fetch = require('node-fetch');
+//https://github.com/node-fetch/node-fetch#installation
+//node-fetch from v3 is an ESM-only module - you are not able to import it with require().
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const {XMLParser} = require('fast-xml-parser');
 const fs = require('fs-extra');
 const podcastSearchApi = 'https://itunes.apple.com';
@@ -67,20 +70,49 @@ function PodcastCore () {
             headers: {
                 'Accept': '*/*',
                 'User-Agent': 'Mozilla/5.0'
-            },
-            timeoutMs: 5000
+            }
         };
-        const headers = request.headers || {};
         const fetchRequest = {
-            headers,
+            headers : request.headers,
             method: request.type,
             credentials: 'same-origin'
         };
-        let contentType = request.contentType;
-        if (contentType) {
-            headers['Content-Type'] = contentType;
-        }
 
+        const fetchTimer = new Promise((resolve, reject) => {
+            let timeOutId = setTimeout(
+                () => {
+                    clearTimeout(timeOutId);
+                    self.toast('error', this.getI18nString('MESSAGE_LOADING_RSS_FEED_TIMEOUT'));
+                    reject("fetchRssUrl timeout");
+                }
+                , 5000
+            )
+        })
+
+        const fetchUrl = new Promise((resolve, reject) => {
+            fetch(request.url, fetchRequest)
+                .then( (response) => response.text() )
+                .then((fetchData) => {
+                    const options = {
+                        ignoreAttributes: false,
+                        attributeNamePrefix: ""
+                    };
+
+                    const parser = new XMLParser(options);
+                    let feed = parser.parse(fetchData);
+                    resolve(feed);
+                })
+        })
+
+        return Promise.race([
+            fetchUrl,
+            fetchTimer
+        ]).then(response => response)
+        .catch((error) => {
+            self.logger.info('ControllerPodcast::fetchRssUrl:Error: ' + request.url + ", error=" + error);
+        })
+
+            /*
         return new Promise((resolve, reject) => {
             const timeout = setTimeout(
                 () => reject(new Error('ControllerPodcast::fetchRssUrl:TIMEOUT='+request.url)),
@@ -92,7 +124,6 @@ function PodcastCore () {
             fetch(request.url, options)
             .then(
                 (response) => {
-                    console.log("=======fetchRssUrl======", response)
                     clearTimeout(timeout);
                     return response.text();
                 },
@@ -116,13 +147,14 @@ function PodcastCore () {
                 clearTimeout(timeout);
                 self.logger.info('ControllerPodcast::fetchRssUrl:Error: ' + error);
                 reject();
-            });
+            })
         });
+             */
     }
 
     const checkAddPodcast = function(rssUrl) {
         let self = this
-        let defer = libQ.defer();
+        //let defer = libQ.defer();
         let message;
 
         let urlObj = urlModule.parse(rssUrl);
@@ -142,20 +174,22 @@ function PodcastCore () {
         catch (error) {
             self.logger.info('ControllerPodcast::checkAddPodcast:ssenhosting: Error: ' + error);
             self.toast('error', this.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
-            defer.reject();
+            //defer.reject();
             return;
         }
 
         let findItem = self.podcasts.items.find( item => item.url === rssUrl);
         if (findItem) {
             self.toast('info', this.getI18nString('DUPLICATED_PODCAST'));
-            defer.resolve();
+            //defer.resolve();
             return;
         }
         self.toast('info', this.getI18nString('ADD_PODCAST_PROCESSING'));
 
         self.fetchRssUrl(rssUrl)
         .then(feed => {
+            if (!feed) return;
+
             let imageUrl, podcastItem;
 
             if ( feed.rss.channel.image && feed.rss.channel.image.url )
@@ -195,15 +229,15 @@ function PodcastCore () {
             message = message.replace('{0}', feedTitle);
             self.toast('success', message);
 
-            defer.resolve();
+            //defer.resolve();
         })
         .catch(error => {
             self.logger.info('ControllerPodcast::checkAddPodcast: Error: ' + error);
             self.toast('error', this.getI18nString('MESSAGE_INVALID_PODCAST_FORMAT'));
-            defer.reject();
+            //defer.reject();
         })
 
-        return defer.promise;
+        //return defer.promise;
     }
 
     const searchPodcast= function(data) {
