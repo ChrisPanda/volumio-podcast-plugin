@@ -8,6 +8,10 @@ const fs = require('fs-extra');
 const podcastCore = require(podcastRoot + '/podcast-core');
 const podcastBrowseUi = require(podcastRoot + '/podcast-browse-ui');
 const podcastSetupUi = require(podcastRoot + '/podcast-setup-ui');
+const io = require('socket.io-client');
+const socket = io.connect('http://localhost:3000');
+const $ = require( "jquery" )( window );
+const css = require('css');
 
 module.exports = ControllerPodcast;
 
@@ -50,6 +54,11 @@ ControllerPodcast.prototype.onStart = function() {
   this.podcastSetupUi.init(this);
 
   self.addToBrowseSources();
+
+  setTimeout(function () {
+    self.listenState();
+  }, 3000);
+
   return libQ.resolve();
 };
 
@@ -311,6 +320,16 @@ ControllerPodcast.prototype.getState = function () {
     return collectedState;
   });
 };
+
+ControllerPodcast.prototype.listenState = function () {
+  socket.emit('getState', '');
+
+  socket.on('pushState', function (state) {
+    console.log("===============listen=========", state)
+    if (state.title)
+      $('browse-page').find('item__info').css( "background-color", "red" );
+  })
+}
 
 ControllerPodcast.prototype.pushState = function (state) {
   var self = this;
