@@ -143,6 +143,7 @@ function PodcastBrowseUi() {
                             service: this.context.serviceName,
                             type: 'mywebradio',
                             title: entry.title,
+                            album: entry.description,
                             uri: `podcast/${podcastId}/${encodeURIComponent(urlParam)}`
                         };
                         if (imageUrl)
