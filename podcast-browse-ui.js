@@ -113,6 +113,12 @@ function PodcastBrowseUi() {
                         Last Build Date: ${feed.rss.channel.lastBuildDate}</div></i>`
                 if (feed.rss.channel.description)
                     html += `<div style="font-size: medium; margin-top: 10px;">${feed.rss.channel.description}</div>`;
+                if (feed.rss.channel.link)
+                    html += `<a target="_blank" style="color: #0060B6; font-size: small; margin-top: 10px;" href="${feed.rss.channel.link}"}>
+                    ${feed.rss.channel.link}
+                    </a>`;
+                if (feed.rss.channel.copyright)
+                    html += `<p style="font-size: small;">${feed.rss.channel.copyright}</p>`;
 
                 if (!feed.rss.channel.item) {
                     feed.rss.channel.item = [];
@@ -139,11 +145,14 @@ function PodcastBrowseUi() {
                             albumart: imageUrl
                         }
                         const urlParam = JSON.stringify(param);
+
+                        let description = entry.description;
+                        description = description.replace(/(<([^>]+)>)/ig, "");
                         let podcastItem = {
                             service: this.context.serviceName,
                             type: 'mywebradio',
                             title: entry.title,
-                            album: entry.description,
+                            album: description,
                             uri: `podcast/${podcastId}/${encodeURIComponent(urlParam)}`
                         };
                         if (imageUrl)
