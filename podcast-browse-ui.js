@@ -91,7 +91,7 @@ function PodcastBrowseUi() {
                 }
             };
 
-            let message = this.podcastCore.getI18nString('LAST_BUILD_DATE');
+            let message = this.podcastCore.getI18nString('WAIT_PODCAST_ITEMS');
             message = message.replace('{0}', targetPodcast.title);
             this.podcastCore.toast('info', message);
 
@@ -110,7 +110,7 @@ function PodcastBrowseUi() {
 
                 if (feed.rss.channel.lastBuildDate)
                     html += `<i><div style="flex-grow: 1; text-align: right; font-size: small;">
-                      ${this.podcastCore.getI18nString('WAIT_PODCAST_ITEMS')}
+                      ${this.podcastCore.getI18nString('LAST_BUILD_DATE')}
                       ${feed.rss.channel.lastBuildDate}</div></i>`
                 if (feed.rss.channel.description)
                     html += `<div style="font-size: medium; margin-top: 10px;">${feed.rss.channel.description}</div>`;
