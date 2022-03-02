@@ -101,7 +101,7 @@ function PodcastBrowseUi() {
                 let html = `<div style="display: flex;margin: 0 0 12px;">
                 <img 
                     src=${feed.rss.channel['itunes:image'].href} 
-                    onerror="/albumart?sourceicon=music_service/podcast/default.jpg" 
+                    onerror="this.src='/albumart?sourceicon=music_service/podcast/default.jpg'" 
                     width="190" 
                     height="190"
                 />
@@ -115,7 +115,12 @@ function PodcastBrowseUi() {
                 if (feed.rss.channel.description)
                     html += `<div style="font-size: medium; margin-top: 10px;">${feed.rss.channel.description}</div>`;
                 if (feed.rss.channel.link)
-                    html += `<a target="_blank" style="color: #0060B6; font-size: small; margin-top: 10px;" href="${feed.rss.channel.link}"}>
+                    html += `<a
+                                target="_blank" href="${feed.rss.channel.link}"
+                                style="color: #0060B6; font-size: small; margin-top: 10px;"
+                                onmouseover="this.style.color='red';this.style.textDecoration='underline'"
+                                onmouseout="this.style.color='#0060B6';this.style.textDecoration='none'"
+                             >
                     ${feed.rss.channel.link}
                     </a>`;
                 if (feed.rss.channel.copyright)
@@ -165,7 +170,7 @@ function PodcastBrowseUi() {
                     }
                     return (index > this.podcastCore.podcasts.maxEpisode);  // limits podcast episodes
                 });
-
+/*
                 html += `
                     <p>episode description
                     <a 
@@ -189,15 +194,7 @@ function PodcastBrowseUi() {
                     z-index: 1002;
                     overflow: auto;"
                 >
-                    This is the episodes content. 
-                    <ul>
-                        <li>
-                        ${response.navigation.lists[0].items[0].title}
-                        </li>
-                        <li>
-                        ${response.navigation.lists[0].items[1].title}
-                        </li>
-                    </ul>
+                    This is the episodes content.
                     <a href="javascript:void(0)"
                         style="color: blue; text-decoration: underline;"
                         onclick="document.getElementById('episode-note').style.display='none';document.getElementById('episode-background').style.display='none'"
@@ -219,6 +216,7 @@ function PodcastBrowseUi() {
                 "></div>
 `
                 html += "</div>"
+ */
                 response.navigation.lists[0].title = html;
 
                 this.cache.set(targetPodcast.id, response);
@@ -238,49 +236,6 @@ function PodcastBrowseUi() {
 
         return defer.promise;
     };
-
-    function constructListTitleWithLink(title, links, isFirstList) {
-        let html = `<div style="display: flex; width: 100%; align-items: flex-end;${isFirstList ? '' : ' margin-top: -24px;'}">
-                    <div>${title}</div>
-                    <div style="flex-grow: 1; text-align: right; font-size: small;">`;
-
-        if (Array.isArray(links)) {
-            links.forEach( (link, index) => {
-                html += this.constructLinkItem(link);
-                if (index < links.length - 1) {
-                    html += '<span style="padding: 0px 5px;">|</span>';
-                }
-            })
-        }
-        else {
-            html += this.constructLinkItem(links);
-        }
-
-        html += '</div></div>';
-
-        return html;
-    }
-
-    function constructLinkItem(link) {
-        let html = '';
-        if (link.icon) {
-            if (link.icon.type === 'fa' && link.icon.float !== 'right') {
-                html += `<i class="${link.icon.class}" style="position: relative; top: 1px; margin-right: 2px; font-size: 16px;${ link.icon.color ? ' color: ' + link.icon.color + ';': ''}"></i>`;
-            }
-            else if (link.icon.type === 'podcast') {
-                html += `<img src="/albumart?sourceicon=${encodeURIComponent('music_service/podcast/assets/default.jpg')}" style="width: 32px; height: 32px; margin-right: 5px; margin-top: -1px;" />`;
-
-            }
-        }
-        html += `<a${link.target ? ' target="' + link.target + '"' : ''}${link.style ? ' style="' + link.style + '"' : ''} href="${link.url}"${link.onclick ? ' onclick="' + link.onclick + '"' : ''}>
-                    ${link.text}
-                </a>`;
-        if (link.icon && link.icon.type === 'fa' && link.icon.float === 'right') {
-            html += `<i class="${link.icon.class}" style="position: relative; top: 1px; margin-left: 2px; font-size: 16px;${ link.icon.color ? ' color: ' + link.icon.color + ';': ''}"></i>`;
-        }
-
-        return html;
-    }
 
     return {
         init: init,
