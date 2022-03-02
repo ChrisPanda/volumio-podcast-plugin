@@ -91,7 +91,7 @@ function PodcastBrowseUi() {
                 }
             };
 
-            let message = this.podcastCore.getI18nString('WAIT_PODCAST_ITEMS');
+            let message = this.podcastCore.getI18nString('LAST_BUILD_DATE');
             message = message.replace('{0}', targetPodcast.title);
             this.podcastCore.toast('info', message);
 
