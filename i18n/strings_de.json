@@ -23,6 +23,7 @@
   "SEARCHING_WAIT_PODCAST": "Suche nach Podcasts aus der Region {0}, bitte warten.",
   "CHANGED_SEARCH_REGION": "Podcast-Suchregion in {0}-Region ändern",
   "CHANGED_MAX_EPISODE": "Ändern Sie die maximale Anzahl({0}) von Episoden",
+  "LAST_BUILD_DATE": "Letztes Erstellungsdatum:",
   "CONFIG": {
     "TITLE": "Podcast Konfiguration",
     "PODCAST": "Podcast",

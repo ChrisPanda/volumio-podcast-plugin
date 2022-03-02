@@ -110,7 +110,8 @@ function PodcastBrowseUi() {
 
                 if (feed.rss.channel.lastBuildDate)
                     html += `<i><div style="flex-grow: 1; text-align: right; font-size: small;">
-                        Last Build Date: ${feed.rss.channel.lastBuildDate}</div></i>`
+                      ${this.podcastCore.getI18nString('WAIT_PODCAST_ITEMS')}
+                      ${feed.rss.channel.lastBuildDate}</div></i>`
                 if (feed.rss.channel.description)
                     html += `<div style="font-size: medium; margin-top: 10px;">${feed.rss.channel.description}</div>`;
                 if (feed.rss.channel.link)

@@ -23,6 +23,7 @@
   "SEARCHING_WAIT_PODCAST": "Searching for podcasts from region {0}, please wait.",
   "CHANGED_SEARCH_REGION": "Change podcast search region to {0} region",
   "CHANGED_MAX_EPISODE": "Change to max number({0}) of getting episodes",
+  "LAST_BUILD_DATE": "Last Build Date:",
   "CONFIG": {
     "TITLE": "Podcast Configuration",
     "PODCAST": "Podcast",

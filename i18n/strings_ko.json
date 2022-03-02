@@ -23,6 +23,7 @@
   "SEARCHING_WAIT_PODCAST": "{0} 지역에서 팟캐스트를 검색중이니 기다려주세요.",
   "CHANGED_SEARCH_REGION": "{0} 지역으로 팟캐스트 검색 지역 변경",
   "CHANGED_MAX_EPISODE": "최대 조회 에피소드 개수 {0}으로 변경",
+  "LAST_BUILD_DATE": "마지막 빌드 날짜:",
   "CONFIG": {
     "TITLE": "팟캐스트 설정",
     "PODCAST": "팟캐스트",
